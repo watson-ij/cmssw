@@ -15,7 +15,7 @@ const std::string & GEMELMap::version() const{
 }
 
 void GEMELMap::convert(GEMROmap & romap) {
-
+  // amc->geb->vfat mapping to GEMDetId
   for (auto imap : theVFatMap_){
     for (unsigned int ix=0;ix<imap.vfatId.size();ix++){
       GEMROmap::eCoord ec;
@@ -33,7 +33,8 @@ void GEMELMap::convert(GEMROmap & romap) {
       romap.add(dc,ec);
     }
   }
-  
+
+  // channel mapping
   for (auto imap : theStripMap_){
     for (unsigned int ix=0;ix<imap.vfatType.size();ix++){
       GEMROmap::channelNum cMap;
@@ -80,7 +81,7 @@ void GEMELMap::convertDummy(GEMROmap & romap) {
 
 	      GEMROmap::dCoord dc;
 	      dc.gemDetId = gemId;
-	      dc.vfatType = 1;
+	      dc.vfatType = 11;// > 10 is vfat v3
 	      dc.iPhi = nphi;
 
 	      romap.add(ec,dc);
@@ -101,12 +102,12 @@ void GEMELMap::convertDummy(GEMROmap & romap) {
   for (int i = 0; i < maxChan_; ++i){
     // only 1 vfat type for dummy map
     GEMROmap::channelNum cMap;
-    cMap.vfatType = 1;
+    cMap.vfatType = 11;
     cMap.chNum = i;
 
     GEMROmap::stripNum sMap;
-    sMap.vfatType = 1;
-    sMap.stNum = i+1;
+    sMap.vfatType = 11;
+    sMap.stNum = i;
 
     romap.add(cMap, sMap);
     romap.add(sMap, cMap);
