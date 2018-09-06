@@ -103,18 +103,34 @@ void GEMRawToDigiModule::produce(edm::StreamID iID, edm::Event & iEvent, edm::Ev
 	auto gebData = std::make_unique<GEBdata>();
 	gebData->setChamberHeader(*(++word));
 	
-	unsigned int m_nvb = gebData->vwh() / 3; // number of VFAT2 blocks
+	unsigned int m_nvb = gebData->vwh() / 3; // number of VFAT blocks
 	uint16_t gebId = gebData->inputID();
 
 	GEMROmap::eCoord geb_ec = {amcId, gebId, 0};
 	GEMROmap::dCoord geb_dc = gemROMap->hitPosition(geb_ec);
 	GEMDetId gemId = geb_dc.gemDetId;
 	
+	int maxVFat = GEMELMap::maxVFatGE11_;
+	if (gemId.station() == 2) maxVFat = GEMELMap::maxVFatGE21_;	  
+	
 	for (unsigned short k = 0; k < m_nvb; k++) {
 	  auto vfatData = std::make_unique<VFATdata>();
 	  vfatData->read_fw(*(++word));
 	  vfatData->read_sw(*(++word));
 	  vfatData->read_tw(*(++word));
+
+	  uint16_t vfatId=vfatData->chipID();
+	  
+	  if (geb_dc.vfatType < 10) {
+	    // vfat v2
+	    vfatData->setVersion(2);
+	  }
+	  else {
+	    // vfat v3
+	    vfatId=vfatData->position();
+	    vfatData->setVersion(3);
+	  }
+	  uint16_t bc=vfatData->bc();
 
 	  if (!vfatData->quality()) {
 	    edm::LogWarning("GEMRawToDigiModule") << "Quality "<< vfatData->quality()
@@ -127,19 +143,6 @@ void GEMRawToDigiModule::produce(edm::StreamID iID, edm::Event & iEvent, edm::Ev
 	    }
 	  }
 	  
-	  uint16_t bc=vfatData->bc();
-	  uint16_t vfatId=vfatData->chipID();
-	  
-	  if (geb_dc.vfatType < 10) {
-	    // vfat v2
-	    vfatData->setVersion(2);
-	  }
-	  else {
-	    // vfat v3
-	    vfatId=vfatData->position();
-	    vfatData->setVersion(3);
-	  }
-	  
 	  //check if ChipID exists.
 	  GEMROmap::eCoord ec = {amcId, gebId, vfatId};
 	  if (!gemROMap->isValidChipID(ec)) {
@@ -149,8 +152,6 @@ void GEMRawToDigiModule::produce(edm::StreamID iID, edm::Event & iEvent, edm::Ev
 	  
 	  GEMROmap::dCoord dc = gemROMap->hitPosition(ec);
 	  gemId = dc.gemDetId;
-	  int maxVFat = GEMELMap::maxVFatGE11_;
-	  if (gemId.station() == 2) maxVFat = GEMELMap::maxVFatGE21_;	  
 	  vfatData->setPhiPos((dc.iPhi-1)%maxVFat);
 	  
 	  int nFiredStrips = 0;
@@ -181,7 +182,7 @@ void GEMRawToDigiModule::produce(edm::StreamID iID, edm::Event & iEvent, edm::Ev
 
 	    outGEMDigis.get()->insertDigi(gemId,digi);	    
 	  }// end of channel loop
-	  std::cout <<gemId<<  " nFiredStrips "<< nFiredStrips<<std::endl;
+	  //std::cout <<gemId<<  " nFiredStrips "<< nFiredStrips<<std::endl;
 	  if (unPackStatusDigis_) {
             outVfatStatus.get()->insertDigi(gemId,GEMVfatStatusDigi(*vfatData));
 	  }

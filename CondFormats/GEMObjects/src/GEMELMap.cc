@@ -28,9 +28,20 @@ void GEMELMap::convert(GEMROmap & romap) {
       dc.gemDetId = GEMDetId(imap.z_direction[ix], 1, st, imap.depth[ix], imap.sec[ix], imap.iEta[ix]);
       dc.vfatType = imap.vfatType[ix]; 
       dc.iPhi = imap.iPhi[ix];
-
+      
       romap.add(ec,dc);
       romap.add(dc,ec);
+
+      GEMROmap::eCoord ecGEB;
+      ecGEB.vfatId = 0;
+      ecGEB.gebId = ec.gebId;
+      ecGEB.amcId = ec.amcId;      
+      GEMROmap::dCoord dcGEB;
+      dcGEB.gemDetId = dc.gemDetId;
+      dcGEB.vfatType = dc.vfatType;
+      romap.add(ecGEB,dcGEB);
+      romap.add(dcGEB,ecGEB);
+
     }
   }
 

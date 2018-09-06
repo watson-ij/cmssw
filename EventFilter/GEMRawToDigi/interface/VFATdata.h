@@ -6,28 +6,30 @@
 namespace gem {
   class VFATdata 
   {
+
+  public:
     /// VFAT data structure - 3 words of 64 bits each
     union {
       uint64_t m_firstWord;
       // v3 dataformat
       struct {
-	uint64_t m_msData1 : 16; ///<channels from 65to128
-	uint16_t m_BC      : 16; ///<Bunch Crossing number, 12 bits
-	uint8_t  m_EC      : 8;  ///<Event Counter, 8 bits
-	uint8_t  m_Header  : 8;  ///<normally 0x1E. 0x5E indicates that the VFAT3 internal buffer is half-full, so it's like a warning
-	uint8_t  m_CRCcheck: 8;  ///<bits 183:177 are not used, should be 0, bit 176 is 1 if CTP7 detected a CRC mismatch
-	uint8_t  m_Pos     : 8;  ///<an 8bit value indicating the VFAT position on this GEB (it can be 0 to 23)
+	uint64_t m_msData1  : 16; ///<channels from 65to128
+	uint64_t m_BC       : 16; ///<Bunch Crossing number, 12 bits
+	uint64_t  m_EC      : 8;  ///<Event Counter, 8 bits
+	uint64_t  m_Header  : 8;  ///<normally 0x1E. 0x5E indicates that the VFAT3 internal buffer is half-full, so it's like a warning
+	uint64_t  m_CRCcheck: 8;  ///<bits 183:177 are not used, should be 0, bit 176 is 1 if CTP7 detected a CRC mismatch
+	uint64_t  m_Pos     : 8;  ///<an 8bit value indicating the VFAT position on this GEB (it can be 0 to 23)
       };      
       // v2 dataformat
       struct {
-	uint64_t m_msData1v2 : 16; ///<channels from 65to128 - placeholder since m_msData1 reads same info
-	uint16_t m_ChipID  : 12; ///<Chip ID, 12 bits
-	uint8_t  m_b1110   : 4;  ///<1110:4 Control bits, shoud be 1110
-	uint8_t  m_Flag    : 4;  ///<Control Flags: 4 bits, Hamming Error/AFULL/SEUlogic/SUEI2C
-	uint8_t  m_ECv2    : 8;  ///<Event Counter, 8 bits
-	uint8_t  m_b1100   : 4;  ///<1100:4, Control bits, shoud be 1100
-	uint16_t m_BCv2    : 12; ///<Bunch Crossing number, 12 bits
-	uint8_t  m_b1010   : 4;  ///<1010:4 Control bits, shoud be 1010
+	uint64_t m_msData1v2: 16; ///<channels from 65to128 - placeholder since m_msData1 reads same info
+	uint64_t m_ChipID   : 12; ///<Chip ID, 12 bits
+	uint64_t  m_b1110   : 4;  ///<1110:4 Control bits, shoud be 1110
+	uint64_t  m_Flag    : 4;  ///<Control Flags: 4 bits, Hamming Error/AFULL/SEUlogic/SUEI2C
+	uint64_t  m_ECv2    : 8;  ///<Event Counter, 8 bits
+	uint64_t  m_b1100   : 4;  ///<1100:4, Control bits, shoud be 1100
+	uint64_t m_BCv2     : 12; ///<Bunch Crossing number, 12 bits
+	uint64_t  m_b1010   : 4;  ///<1010:4 Control bits, shoud be 1010
       };
     };
     union {      
@@ -49,6 +51,7 @@ namespace gem {
         
     VFATdata(){
       m_isBlockGood = true;
+      m_ver = 1;
     }
     ~VFATdata(){}
     VFATdata(const uint16_t BC,
@@ -107,6 +110,7 @@ namespace gem {
     }
 
     void setVersion(int i) {m_ver = i;}
+    int version() {return m_ver;}
     void setIsBlockGood(bool t) { m_isBlockGood = t;}
     bool isBlockGood() const { return m_isBlockGood;}
     
@@ -125,8 +129,8 @@ namespace gem {
     /// v2
     uint8_t   b1010      () const { return m_b1010;      }
     uint8_t   b1100      () const { return m_b1100;      }
-    uint8_t   flag       () const { return m_Flag;       }
     uint8_t   b1110      () const { return m_b1110;      }
+    uint8_t   flag       () const { return m_Flag;       }
     uint16_t  chipID     () const { return m_ChipID;     }
     uint16_t  crc        () const { return m_crc;        }
     
