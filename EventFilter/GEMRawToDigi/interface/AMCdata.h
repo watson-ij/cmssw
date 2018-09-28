@@ -253,7 +253,7 @@ namespace gem {
     uint32_t m_CRC;
     uint8_t m_L1AT;
     uint32_t m_DlengthT;
-	
+    
   };
 }
 #endif

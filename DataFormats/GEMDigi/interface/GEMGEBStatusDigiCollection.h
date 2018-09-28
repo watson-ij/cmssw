@@ -2,9 +2,9 @@
 #define DataFormats_GEMDigi_GEMGEBStatusDigiCollection_h
 
 #include "DataFormats/GEMDigi/interface/GEMGEBStatusDigi.h"
+#include "DataFormats/MuonDetId/interface/GEMDetId.h"
 #include "DataFormats/MuonData/interface/MuonDigiCollection.h"
 
-typedef MuonDigiCollection<uint16_t, GEMGEBStatusDigi> GEMGEBStatusDigiCollection;
+typedef MuonDigiCollection<GEMDetId, GEMGEBStatusDigi> GEMGEBStatusDigiCollection;
 
 #endif
-

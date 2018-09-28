@@ -94,40 +94,33 @@ void GEMDigiToRawModule::produce(edm::StreamID iID, edm::Event & iEvent, edm::Ev
 	gebData->setInputID(gebId);	
       }
             
-      uint16_t vfatId = ec.vfatId;
-      GEMDetId gemId = dc.gemDetId;
+      GEMDetId gemId   = dc.gemDetId;
+      uint8_t  EC      =0;             ///<Event Counter, 8 bits
+      uint8_t  chipPos =0;             ///<Calculated chip position
+      uint64_t lsData  =0;             ///<channels from 1to64 
+      uint64_t msData  =0;             ///<channels from 65to128
+      
+      int maxVFat = GEMELMap::maxVFatGE11_;
+      if (gemId.station() == 2) maxVFat = GEMELMap::maxVFatGE21_;	
 
       for (uint16_t bc = 0; bc < 2*GEMELMap::amcBX_; ++bc){
 	bool hasDigi = false;
+	uint16_t BC =bc;            ///<Bunch Crossing number, 12 bits
 
-	uint8_t  b1010      =0xA;           ///<1010:4 Control bits, shoud be 1010
-	uint16_t BC         =bc;            ///<Bunch Crossing number, 12 bits
-	uint8_t  b1100      =0xC;           ///<1100:4, Control bits, shoud be 1100
-	uint8_t  EC         =0;             ///<Event Counter, 8 bits
-	uint8_t  Flag       =0;             ///<Control Flags: 4 bits, Hamming Error/AFULL/SEUlogic/SUEI2C
-	uint8_t  b1110      =0xE;           ///<1110:4 Control bits, shoud be 1110
-	int      SlotNumber =0;             ///<Calculated chip position
-	bool     isBlockGood=false;         ///<Shows if block is good (control bits, chip ID and CRC checks)
-	uint64_t lsData     =0;             ///<channels from 1to64 
-	uint64_t msData     =0;             ///<channels from 65to128
-	uint16_t crc        =0;             ///<Check Sum value, 16 bits
-	uint16_t crc_calc   =0;             ///<Check Sum value recalculated, 16 bits
-	
 	GEMDigiCollection::Range range = gemDigis->get(gemId);
 	for (GEMDigiCollection::const_iterator digiIt = range.first; digiIt!=range.second; ++digiIt){
 
 	  const GEMDigi & digi = (*digiIt);
 	  if (digi.bx() != bc-GEMELMap::amcBX_) continue;
 	  
-	  int maxVFat = GEMELMap::maxVFatGE11_;
-	  if (gemId.station() == 2) maxVFat = GEMELMap::maxVFatGE21_;
-
 	  int localStrip = digi.strip() - ((dc.iPhi-1)%maxVFat)*GEMELMap::maxChan_;	  
 	  // skip strips not in current vFat
-	  if (localStrip < 1 || localStrip > GEMELMap::maxChan_) continue;
+	  if (localStrip < 0 || localStrip > GEMELMap::maxChan_ -1) continue;
 
 	  hasDigi = true;
-
+	  std::cout <<" gemDetId "<< gemId 
+		    <<" localStrip "<< localStrip
+		    << std::endl;
 	  GEMROmap::stripNum stMap = {dc.vfatType, localStrip};
 	  GEMROmap::channelNum chMap = gemROMap->hitPosition(stMap);
 	  
@@ -136,7 +129,7 @@ void GEMDigiToRawModule::produce(edm::StreamID iID, edm::Event & iEvent, edm::Ev
 	  if (chan < 64) lsData = lsData | (oneBit << chan);
 	  else msData = msData | (oneBit << (chan-64));
 
-	  LogDebug("GEMDigiToRawModule") <<" vfatId "<<ec.vfatId
+	  LogDebug("GEMDigiToRawModule") <<" chipPos "<<chipPos
 	  				 <<" gemDetId "<< gemId
 	  				 <<" chan "<< chMap.chNum
 	  				 <<" strip "<< stMap.stNum
@@ -146,8 +139,7 @@ void GEMDigiToRawModule::produce(edm::StreamID iID, edm::Event & iEvent, edm::Ev
       
 	if (!hasDigi) continue;
 	// only make vfat with hits
-	auto vfatData = std::make_unique<VFATdata>(b1010, BC, b1100, EC, Flag, b1110, vfatId, lsData, msData,
-						   crc, crc_calc, SlotNumber, isBlockGood);
+	auto vfatData = std::make_unique<VFATdata>(BC, EC, chipPos, lsData, msData);
 	gebData->addVFAT(*vfatData);
       }
       
