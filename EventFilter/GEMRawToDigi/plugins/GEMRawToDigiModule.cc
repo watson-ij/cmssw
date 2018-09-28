@@ -24,8 +24,9 @@ GEMRawToDigiModule::GEMRawToDigiModule(const edm::ParameterSet & pset) :
   produces<GEMDigiCollection>(); 
   if (unPackStatusDigis_) {
     produces<GEMVfatStatusDigiCollection>("vfatStatus");
-    produces<GEMGEBStatusDigiCollection>("GEBStatus");
-    produces<GEMAMCStatusDigiCollection>("AMCStatus"); 
+    produces<GEMGEBStatusDigiCollection>("gebStatus");
+    produces<GEMAMCdataCollection>("AMCdata"); 
+    produces<GEMAMC13EventCollection>("AMC13Event"); 
   }
 }
 
@@ -60,9 +61,10 @@ std::shared_ptr<GEMROmap> GEMRawToDigiModule::globalBeginRun(edm::Run const&, ed
 void GEMRawToDigiModule::produce(edm::StreamID iID, edm::Event & iEvent, edm::EventSetup const&) const
 {
   auto outGEMDigis = std::make_unique<GEMDigiCollection>();
-  auto outVfatStatus = std::make_unique<GEMVfatStatusDigiCollection>();
+  auto outVFATStatus = std::make_unique<GEMVfatStatusDigiCollection>();
   auto outGEBStatus = std::make_unique<GEMGEBStatusDigiCollection>();
-  auto outAMCStatus = std::make_unique<GEMAMCStatusDigiCollection>();
+  auto outAMCdata = std::make_unique<GEMAMCdataCollection>();
+  auto outAMC13Event = std::make_unique<GEMAMC13EventCollection>();
 
   // Take raw from the event
   edm::Handle<FEDRawDataCollection> fed_buffers;
@@ -109,7 +111,6 @@ void GEMRawToDigiModule::produce(edm::StreamID iID, edm::Event & iEvent, edm::Ev
 	GEMROmap::eCoord geb_ec = {amcId, gebId, 0};
 	GEMROmap::dCoord geb_dc = gemROMap->hitPosition(geb_ec);
 	GEMDetId gemId = geb_dc.gemDetId;
-	
 	int maxVFat = GEMELMap::maxVFatGE11_;
 	if (gemId.station() == 2) maxVFat = GEMELMap::maxVFatGE21_;	  
 	
@@ -149,10 +150,20 @@ void GEMRawToDigiModule::produce(edm::StreamID iID, edm::Event & iEvent, edm::Ev
 	    edm::LogWarning("GEMRawToDigiModule") << "InValid ChipID :"<<ec.vfatId;
 	    continue;
 	  }
+
+	  // std::cout <<"amcId " << amcId
+	  // 	    <<" gebId "<< gebId
+	  // 	    <<" vfatId "<< vfatId
+	  // 	    <<std::endl;
 	  
 	  GEMROmap::dCoord dc = gemROMap->hitPosition(ec);
 	  gemId = dc.gemDetId;
 	  vfatData->setPhiPos((dc.iPhi-1)%maxVFat);
+
+	  // std::cout <<"vfat Id " << gemId
+	  // 	    <<" vfat type "<< dc.vfatType
+	  // 	    <<" phi "<< vfatData->phiPos()
+	  // 	    <<std::endl;
 	  
 	  int nFiredStrips = 0;
 	  for (int chan = 0; chan < VFATdata::nChannels; ++chan) {
@@ -171,7 +182,7 @@ void GEMRawToDigiModule::produce(edm::StreamID iID, edm::Event & iEvent, edm::Ev
             GEMROmap::channelNum chMap = {dc.vfatType, chan};
             GEMROmap::stripNum stMap = gemROMap->hitPosition(chMap);
 
-            int stripId = stMap.stNum + (dc.iPhi-1)%maxVFat*GEMELMap::maxChan_;    
+            int stripId = stMap.stNum + vfatData->phiPos()*GEMELMap::maxChan_;    
 
 	    GEMDigi digi(stripId,bx);
 	    LogDebug("GEMRawToDigiModule") <<" vfatId "<<ec.vfatId
@@ -180,44 +191,62 @@ void GEMRawToDigiModule::produce(edm::StreamID iID, edm::Event & iEvent, edm::Ev
 					   <<" strip "<< stripId
 					   <<" bx "<< digi.bx();
 
+	  std::cout << "bunchCrossing "<< iEvent.bunchCrossing()
+		    << " orbitNumber "<< iEvent.orbitNumber()
+		    << std::endl;
+	  std::cout << "amc13 bunchCrossing "<< amc13Event->bx_id()
+		    << std::endl;
+	  std::cout << "amc   bunchCrossing "<< amcData->bx()
+		    << " orbitNumber "<< amcData->orbitNum()
+		    << std::endl;
+	  
+	    
+	     std::cout <<" vfatId "<<ec.vfatId
+					   <<" gemDetId "<< gemId
+					   <<" chan "<< chMap.chNum
+					   <<" strip "<< stripId
+					   <<" bx "<< digi.bx()
+		       <<std::endl;
+
 	    outGEMDigis.get()->insertDigi(gemId,digi);	    
 	  }// end of channel loop
-	  //std::cout <<gemId<<  " nFiredStrips "<< nFiredStrips<<std::endl;
+	  //	  std::cout <<gemId<<  " nFiredStrips "<< nFiredStrips<<std::endl;
 	  if (unPackStatusDigis_) {
-            outVfatStatus.get()->insertDigi(gemId,GEMVfatStatusDigi(*vfatData));
+            outVFATStatus.get()->insertDigi(gemId,GEMVfatStatusDigi(*vfatData));
 	  }
 	  
-	  gebData->addVFAT(*vfatData);
 	} // end of vfat loop
 	
-	gebData->setChamberTrailer(*(++word));
         if (unPackStatusDigis_) {
-          outGEBStatus.get()->insertDigi(gemId.chamberId(),GEMGEBStatusDigi(*gebData)); 
+	  gebData->setChamberTrailer(*(++word));
+	  outGEBStatus.get()->insertDigi(gemId.chamberId(),GEMGEBStatusDigi(*gebData)); 
         }
 	
-	amcData->addGEB(*gebData);
-      }
+      } // end of geb loop
       
-      amcData->setGEMeventTrailer(*(++word));
-      amcData->setAMCTrailer(*(++word));
-
       if (unPackStatusDigis_) {
-        outAMCStatus.get()->insertDigi(amcData->boardId(), GEMAMCStatusDigi(*amcData));
+	amcData->setGEMeventTrailer(*(++word));
+	amcData->setAMCTrailer(*(++word));
+        outAMCdata.get()->insertDigi(amcData->boardId(), *amcData);
       }
 
-      amc13Event->addAMCpayload(*amcData);
+    } // end of amc loop
+    
+    if (unPackStatusDigis_) {
+      amc13Event->setAMC13trailer(*(++word));
+      amc13Event->setCDFTrailer(*(++word));    
+      outAMC13Event.get()->insertDigi(amc13Event->bx_id(), *amc13Event);
     }
     
-    amc13Event->setAMC13trailer(*(++word));
-    amc13Event->setCDFTrailer(*(++word));
-  }
+  } // end of amc13Event
   
   iEvent.put(std::move(outGEMDigis));
   
   if (unPackStatusDigis_) {
-    iEvent.put(std::move(outVfatStatus), "vfatStatus");
-    iEvent.put(std::move(outGEBStatus), "GEBStatus");
-    iEvent.put(std::move(outAMCStatus), "AMCStatus");
+    iEvent.put(std::move(outVFATStatus), "vfatStatus");
+    iEvent.put(std::move(outGEBStatus), "gebStatus");
+    iEvent.put(std::move(outAMCdata), "AMCdata");
+    iEvent.put(std::move(outAMC13Event), "AMC13Event");
   }
   
 }

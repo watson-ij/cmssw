@@ -21,23 +21,27 @@ void GEMELMap::convert(GEMROmap & romap) {
       GEMROmap::eCoord ec;
       ec.vfatId = imap.vfatId[ix] & chipIdMask_;
       ec.gebId = imap.gebId[ix];
-      ec.amcId = imap.amcId[ix];      
+      ec.amcId = imap.amcId[ix];
 
       int st = std::abs(imap.z_direction[ix]);
       GEMROmap::dCoord dc;
       dc.gemDetId = GEMDetId(imap.z_direction[ix], 1, st, imap.depth[ix], imap.sec[ix], imap.iEta[ix]);
       dc.vfatType = imap.vfatType[ix]; 
       dc.iPhi = imap.iPhi[ix];
-      
+      //dc.pos = imap.vfat_position[ix];
       romap.add(ec,dc);
       romap.add(dc,ec);
-
+      std::cout << "emap gemDetId "<< dc.gemDetId
+		<< " vfatId " << ec.vfatId
+		<< " vfatType " << dc.vfatType
+		<< " iPhi " << dc.iPhi
+		<< std::endl;
       GEMROmap::eCoord ecGEB;
       ecGEB.vfatId = 0;
       ecGEB.gebId = ec.gebId;
       ecGEB.amcId = ec.amcId;      
       GEMROmap::dCoord dcGEB;
-      dcGEB.gemDetId = dc.gemDetId;
+      dcGEB.gemDetId = dc.gemDetId.chamberId();
       dcGEB.vfatType = dc.vfatType;
       romap.add(ecGEB,dcGEB);
       romap.add(dcGEB,ecGEB);
@@ -56,6 +60,12 @@ void GEMELMap::convert(GEMROmap & romap) {
       sMap.vfatType = imap.vfatType[ix];
       sMap.stNum = imap.vfatStrip[ix];
 
+      std::cout << "emap vfatType "<< cMap.vfatType
+		<< " chNum " << cMap.chNum
+		<< " stNum " << sMap.stNum
+		<< std::endl;
+
+      
       romap.add(cMap, sMap);
       romap.add(sMap, cMap);
     }
@@ -83,7 +93,6 @@ void GEMELMap::convertDummy(GEMROmap & romap) {
 	    GEMDetId gemId(re, 1, st, ly, ch, roll);
 
 	    for (int nphi = 1; nphi <= maxVFat; ++nphi){
-	      chipId++;
 	      
 	      GEMROmap::eCoord ec;
 	      ec.vfatId = chipId;
@@ -94,9 +103,11 @@ void GEMELMap::convertDummy(GEMROmap & romap) {
 	      dc.gemDetId = gemId;
 	      dc.vfatType = 11;// > 10 is vfat v3
 	      dc.iPhi = nphi;
-
+	      
 	      romap.add(ec,dc);
 	      romap.add(dc,ec);
+	      
+	      chipId++;
 	    }
 	  }
 	  // 5 bits for geb

@@ -2,7 +2,6 @@
 #define DataFormats_GEMDigi_GEMGEBStatusDigi_H
 
 #include <cstdint>
-#include <vector>
 #include "EventFilter/GEMRawToDigi/interface/GEBdata.h"
 
 class GEMGEBStatusDigi {

@@ -251,17 +251,17 @@ void GEMDQMStatusDigi::analyze(edm::Event const& event, edm::EventSetup const& e
     int nIdx = GEBBinN(tmpID);    
     for ( auto vfatError = range.first; vfatError != range.second; ++vfatError ) {
         
-        h1B1010All_->Fill(vfatError->getB1010());
-        h1B1100All_->Fill(vfatError->getB1100());
-        h1B1110All_->Fill(vfatError->getB1110());
-        h1FlagAll_->Fill(vfatError->getFlag());
-        h1CRCAll_->Fill(vfatError->getCrc());
+        // h1B1010All_->Fill(vfatError->getB1010());
+        // h1B1100All_->Fill(vfatError->getB1100());
+        // h1B1110All_->Fill(vfatError->getB1110());
+        // h1FlagAll_->Fill(vfatError->getFlag());
+        // h1CRCAll_->Fill(vfatError->getCrc());
 
-        h2B1010All_->Fill(vfatError->getB1010(), nIdx);
-        h2B1100All_->Fill(vfatError->getB1100(), nIdx);
-        h2B1110All_->Fill(vfatError->getB1110(), nIdx);
-        h2FlagAll_->Fill(vfatError->getFlag(), nIdx);
-        h2CRCAll_->Fill(vfatError->getCrc(), nIdx);
+        // h2B1010All_->Fill(vfatError->getB1010(), nIdx);
+        // h2B1100All_->Fill(vfatError->getB1100(), nIdx);
+        // h2B1110All_->Fill(vfatError->getB1110(), nIdx);
+        // h2FlagAll_->Fill(vfatError->getFlag(), nIdx);
+        // h2CRCAll_->Fill(vfatError->getCrc(), nIdx);
       }
     }
 
@@ -315,11 +315,11 @@ void GEMDQMStatusDigi::analyze(edm::Event const& event, edm::EventSetup const& e
         if (binFired) {ChamT_->Fill(bin); ChamT2D_->Fill(bin, nIdxAMC);}
       }
       
-      Tstate_->Fill(amc->Tstate());
+      //      Tstate_->Fill(amc->Tstate());
       GDcount_->Fill(amc->GDcount());
       OOSG_->Fill(amc->OOSG());
       
-      Tstate2D_->Fill(amc->Tstate(), nIdxAMC);
+      //Tstate2D_->Fill(amc->Tstate(), nIdxAMC);
       GDcount2D_->Fill(amc->GDcount(), nIdxAMC);
       OOSG2D_->Fill(amc->OOSG(), nIdxAMC);
     }

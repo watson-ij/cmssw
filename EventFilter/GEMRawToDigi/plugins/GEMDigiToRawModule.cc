@@ -115,10 +115,12 @@ void GEMDigiToRawModule::produce(edm::StreamID iID, edm::Event & iEvent, edm::Ev
 	  
 	  int localStrip = digi.strip() - ((dc.iPhi-1)%maxVFat)*GEMELMap::maxChan_;	  
 	  // skip strips not in current vFat
-	  if (localStrip < 0 || localStrip > GEMELMap::maxChan_) continue;
+	  if (localStrip < 0 || localStrip > GEMELMap::maxChan_ -1) continue;
 
 	  hasDigi = true;
-
+	  std::cout <<" gemDetId "<< gemId 
+		    <<" localStrip "<< localStrip
+		    << std::endl;
 	  GEMROmap::stripNum stMap = {dc.vfatType, localStrip};
 	  GEMROmap::channelNum chMap = gemROMap->hitPosition(stMap);
 	  

@@ -1,4 +1,5 @@
 #include "DataFormats/GEMDigi/interface/GEMVfatStatusDigi.h"
+#include <iostream>
 
 GEMVfatStatusDigi::GEMVfatStatusDigi(gem::VFATdata vfat)
 {
@@ -11,4 +12,6 @@ GEMVfatStatusDigi::GEMVfatStatusDigi(gem::VFATdata vfat)
   flag_        = vfat.flag();
   isBlockGood_ = vfat.isBlockGood();
   position_    = vfat.phiPos();
+  ec_          = vfat.ec();
+  bc_          = vfat.bc();
 };
