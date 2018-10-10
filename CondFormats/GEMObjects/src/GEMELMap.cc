@@ -31,11 +31,11 @@ void GEMELMap::convert(GEMROmap & romap) {
       //dc.pos = imap.vfat_position[ix];
       romap.add(ec,dc);
       romap.add(dc,ec);
-      std::cout << "emap gemDetId "<< dc.gemDetId
-		<< " vfatId " << ec.vfatId
-		<< " vfatType " << dc.vfatType
-		<< " iPhi " << dc.iPhi
-		<< std::endl;
+      // std::cout << "emap gemDetId "<< dc.gemDetId
+      // 		<< " vfatId " << ec.vfatId
+      // 		<< " vfatType " << dc.vfatType
+      // 		<< " iPhi " << dc.iPhi
+      // 		<< std::endl;
       GEMROmap::eCoord ecGEB;
       ecGEB.vfatId = 0;
       ecGEB.gebId = ec.gebId;
@@ -60,11 +60,10 @@ void GEMELMap::convert(GEMROmap & romap) {
       sMap.vfatType = imap.vfatType[ix];
       sMap.stNum = imap.vfatStrip[ix];
 
-      std::cout << "emap vfatType "<< cMap.vfatType
-		<< " chNum " << cMap.chNum
-		<< " stNum " << sMap.stNum
-		<< std::endl;
-
+      // std::cout << "emap vfatType "<< cMap.vfatType
+      // 		<< " chNum " << cMap.chNum
+      // 		<< " stNum " << sMap.stNum
+      // 		<< std::endl;
       
       romap.add(cMap, sMap);
       romap.add(sMap, cMap);
@@ -76,7 +75,7 @@ void GEMELMap::convertDummy(GEMROmap & romap) {
   // 12 bits for vfat, 5 bits for geb, 8 bit long GLIB serial number
   uint16_t amcId = 1; //amc
   uint16_t gebId = 0; 
-	
+  
   for (int re = -1; re <= 1; re = re+2) {
     for (int st = GEMDetId::minStationId; st<=GEMDetId::maxStationId; ++st) {
       int maxVFat = maxVFatGE11_;
@@ -88,21 +87,28 @@ void GEMELMap::convertDummy(GEMROmap & romap) {
 	  // 1 geb per chamber
 	  gebId++;	  	  	  
 	  uint16_t chipId = 0;	 	  
-	  for (int roll = 1; roll<=GEMDetId::maxRollId; ++roll) {
+	  for (int nphi = 1+(ch-1)*maxVFat; nphi <= ch*maxVFat; ++nphi){
+	    for (int roll = 1; roll<=maxEtaPartition_; ++roll) {
 	    
-	    GEMDetId gemId(re, 1, st, ly, ch, roll);
-
-	    for (int nphi = 1; nphi <= maxVFat; ++nphi){
+	      GEMDetId gemId(re, 1, st, ly, ch, roll);
 	      
 	      GEMROmap::eCoord ec;
 	      ec.vfatId = chipId;
 	      ec.gebId = gebId;
 	      ec.amcId = amcId;
-
+	      
 	      GEMROmap::dCoord dc;
 	      dc.gemDetId = gemId;
 	      dc.vfatType = 11;// > 10 is vfat v3
 	      dc.iPhi = nphi;
+
+      std::cout << "emap gemDetId "<< dc.gemDetId
+      		<< " amcId " << int(ec.amcId)
+      		<< " gebId " << int(ec.gebId)
+      		<< " vfatId " << int(ec.vfatId)
+      		<< " vfatType " << dc.vfatType
+      		<< " iPhi " << dc.iPhi
+      		<< std::endl;
 	      
 	      romap.add(ec,dc);
 	      romap.add(dc,ec);
