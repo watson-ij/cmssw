@@ -126,12 +126,6 @@ void GEMDigiToRawModule::produce(edm::StreamID iID, edm::Event & iEvent, edm::Ev
 	  if (chan < 64) lsData = lsData | (oneBit << chan);
 	  else msData = msData | (oneBit << (chan-64));
 
-	  std::cout  <<" chipPos "<<int(chipPos)
-		     <<" gemDetId "<< gemId
-		     <<" chan "<< chMap.chNum
-		     <<" strip "<< stMap.stNum
-		     <<" bx "<< digi.bx()
-		     << std::endl;
 	  LogDebug("GEMDigiToRawModule") <<" chipPos "<<int(chipPos)
 	  				 <<" gemDetId "<< gemId
 	  				 <<" chan "<< chMap.chNum

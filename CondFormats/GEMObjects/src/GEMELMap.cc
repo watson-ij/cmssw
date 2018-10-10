@@ -31,11 +31,7 @@ void GEMELMap::convert(GEMROmap & romap) {
       //dc.pos = imap.vfat_position[ix];
       romap.add(ec,dc);
       romap.add(dc,ec);
-      // std::cout << "emap gemDetId "<< dc.gemDetId
-      // 		<< " vfatId " << ec.vfatId
-      // 		<< " vfatType " << dc.vfatType
-      // 		<< " iPhi " << dc.iPhi
-      // 		<< std::endl;
+
       GEMROmap::eCoord ecGEB;
       ecGEB.vfatId = 0;
       ecGEB.gebId = ec.gebId;
@@ -60,11 +56,6 @@ void GEMELMap::convert(GEMROmap & romap) {
       sMap.vfatType = imap.vfatType[ix];
       sMap.stNum = imap.vfatStrip[ix];
 
-      // std::cout << "emap vfatType "<< cMap.vfatType
-      // 		<< " chNum " << cMap.chNum
-      // 		<< " stNum " << sMap.stNum
-      // 		<< std::endl;
-      
       romap.add(cMap, sMap);
       romap.add(sMap, cMap);
     }
@@ -102,14 +93,6 @@ void GEMELMap::convertDummy(GEMROmap & romap) {
 	      dc.vfatType = 11;// > 10 is vfat v3
 	      dc.iPhi = nphi;
 
-      std::cout << "emap gemDetId "<< dc.gemDetId
-      		<< " amcId " << int(ec.amcId)
-      		<< " gebId " << int(ec.gebId)
-      		<< " vfatId " << int(ec.vfatId)
-      		<< " vfatType " << dc.vfatType
-      		<< " iPhi " << dc.iPhi
-      		<< std::endl;
-	      
 	      romap.add(ec,dc);
 	      romap.add(dc,ec);
 	      

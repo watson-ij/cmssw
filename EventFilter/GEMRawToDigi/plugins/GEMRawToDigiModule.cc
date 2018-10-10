@@ -152,20 +152,10 @@ void GEMRawToDigiModule::produce(edm::StreamID iID, edm::Event & iEvent, edm::Ev
 	    continue;
 	  }
 
-	  // std::cout <<"amcId " << amcId
-	  // 	    <<" gebId "<< gebId
-	  // 	    <<" vfatId "<< vfatId
-	  // 	    <<std::endl;
-	  
 	  GEMROmap::dCoord dc = gemROMap->hitPosition(ec);
 	  gemId = dc.gemDetId;
 	  vfatData->setPhiPos((dc.iPhi-1)%maxVFat);
 
-	  // std::cout <<"vfat Id " << gemId
-	  // 	    <<" vfat type "<< dc.vfatType
-	  // 	    <<" phi "<< vfatData->phiPos()
-	  // 	    <<std::endl;
-	  
 	  int nFiredStrips = 0;
 	  for (int chan = 0; chan < VFATdata::nChannels; ++chan) {
 	    uint8_t chan0xf = 0;
@@ -191,33 +181,11 @@ void GEMRawToDigiModule::produce(edm::StreamID iID, edm::Event & iEvent, edm::Ev
 					   <<" chan "<< chMap.chNum
 					   <<" strip "<< stripId
 					   <<" bx "<< digi.bx();
-	    std::cout  <<" chipPos "<<int(ec.vfatId)
-		       <<" gemDetId "<< gemId
-		       <<" chan "<< chMap.chNum
-		       <<" strip "<< stMap.stNum
-		       <<" bx "<< digi.bx()
-		       << std::endl;
-
-	    // std::cout << "bunchCrossing "<< iEvent.bunchCrossing()
-	    // 	      << " orbitNumber "<< iEvent.orbitNumber()
-	    // 	      << std::endl;
-	    // std::cout << "amc13 bunchCrossing "<< amc13Event->bx_id()
-	    // 	      << std::endl;
-	    // std::cout << "amc   bunchCrossing "<< amcData->bx()
-	    // 	      << " orbitNumber "<< amcData->orbitNum()
-	    // 	      << std::endl;
-	  
 	    
-	    //  std::cout <<" vfatId "<<ec.vfatId
-	    // 				   <<" gemDetId "<< gemId
-	    // 				   <<" chan "<< chMap.chNum
-	    // 				   <<" strip "<< stripId
-	    // 				   <<" bx "<< digi.bx()
-	    // 	       <<std::endl;
-
-	    outGEMDigis.get()->insertDigi(gemId,digi);	    
+	    outGEMDigis.get()->insertDigi(gemId,digi);
+	    
 	  }// end of channel loop
-	  //	  std::cout <<gemId<<  " nFiredStrips "<< nFiredStrips<<std::endl;
+	  
 	  if (unPackStatusDigis_) {
             outVFATStatus.get()->insertDigi(gemId,GEMVfatStatusDigi(*vfatData));
 	  }
