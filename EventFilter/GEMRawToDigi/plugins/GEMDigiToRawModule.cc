@@ -93,12 +93,12 @@ void GEMDigiToRawModule::produce(edm::StreamID iID, edm::Event & iEvent, edm::Ev
 	gebData = std::make_unique<GEBdata>();
 	gebData->setInputID(gebId);	
       }
-            
+      
       GEMDetId gemId   = dc.gemDetId;
-      uint8_t  EC      =0;             ///<Event Counter, 8 bits
-      uint8_t  chipPos =0;             ///<Calculated chip position
-      uint64_t lsData  =0;             ///<channels from 1to64 
-      uint64_t msData  =0;             ///<channels from 65to128
+      uint8_t  EC      = 0;             ///<Event Counter, 8 bits
+      uint8_t  chipPos = ec.vfatId;     ///<Calculated chip position
+      uint64_t lsData  = 0;             ///<channels from 1to64 
+      uint64_t msData  = 0;             ///<channels from 65to128
       
       int maxVFat = GEMELMap::maxVFatGE11_;
       if (gemId.station() == 2) maxVFat = GEMELMap::maxVFatGE21_;	
@@ -118,9 +118,6 @@ void GEMDigiToRawModule::produce(edm::StreamID iID, edm::Event & iEvent, edm::Ev
 	  if (localStrip < 0 || localStrip > GEMELMap::maxChan_ -1) continue;
 
 	  hasDigi = true;
-	  std::cout <<" gemDetId "<< gemId 
-		    <<" localStrip "<< localStrip
-		    << std::endl;
 	  GEMROmap::stripNum stMap = {dc.vfatType, localStrip};
 	  GEMROmap::channelNum chMap = gemROMap->hitPosition(stMap);
 	  
@@ -129,11 +126,11 @@ void GEMDigiToRawModule::produce(edm::StreamID iID, edm::Event & iEvent, edm::Ev
 	  if (chan < 64) lsData = lsData | (oneBit << chan);
 	  else msData = msData | (oneBit << (chan-64));
 
-	  LogDebug("GEMDigiToRawModule") <<" chipPos "<<chipPos
+	  LogDebug("GEMDigiToRawModule") <<" chipPos "<<int(chipPos)
 	  				 <<" gemDetId "<< gemId
 	  				 <<" chan "<< chMap.chNum
 	  				 <<" strip "<< stMap.stNum
-	  				 <<" bx "<< digi.bx();
+	  				 <<" bx "<< digi.bx();	  
 	  
 	}
       

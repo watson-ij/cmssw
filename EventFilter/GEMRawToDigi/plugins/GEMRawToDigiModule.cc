@@ -105,10 +105,10 @@ void GEMRawToDigiModule::produce(edm::StreamID iID, edm::Event & iEvent, edm::Ev
 	auto gebData = std::make_unique<GEBdata>();
 	gebData->setChamberHeader(*(++word));
 	
-	unsigned int m_nvb = gebData->vwh() / 3; // number of VFAT blocks
+	unsigned int m_nvb = int(gebData->vwh()) / 3; // number of VFAT blocks
 	uint16_t gebId = gebData->inputID();
-
-	GEMROmap::eCoord geb_ec = {amcId, gebId, 0};
+	uint16_t vfatId=0;
+	GEMROmap::eCoord geb_ec = {amcId, gebId, vfatId};
 	GEMROmap::dCoord geb_dc = gemROMap->hitPosition(geb_ec);
 	GEMDetId gemId = geb_dc.gemDetId;
 	int maxVFat = GEMELMap::maxVFatGE11_;
@@ -119,16 +119,15 @@ void GEMRawToDigiModule::produce(edm::StreamID iID, edm::Event & iEvent, edm::Ev
 	  vfatData->read_fw(*(++word));
 	  vfatData->read_sw(*(++word));
 	  vfatData->read_tw(*(++word));
-
-	  uint16_t vfatId=vfatData->chipID();
 	  
 	  if (geb_dc.vfatType < 10) {
 	    // vfat v2
+	    vfatId = vfatData->chipID();
 	    vfatData->setVersion(2);
 	  }
 	  else {
 	    // vfat v3
-	    vfatId=vfatData->position();
+	    vfatId = vfatData->position();
 	    vfatData->setVersion(3);
 	  }
 	  uint16_t bc=vfatData->bc();
@@ -147,24 +146,16 @@ void GEMRawToDigiModule::produce(edm::StreamID iID, edm::Event & iEvent, edm::Ev
 	  //check if ChipID exists.
 	  GEMROmap::eCoord ec = {amcId, gebId, vfatId};
 	  if (!gemROMap->isValidChipID(ec)) {
-	    edm::LogWarning("GEMRawToDigiModule") << "InValid ChipID :"<<ec.vfatId;
+	    edm::LogWarning("GEMRawToDigiModule") << "InValid: amcId "<<ec.amcId
+						  << " gebId "<< ec.gebId
+						  << " vfatId "<< ec.vfatId;
 	    continue;
 	  }
 
-	  // std::cout <<"amcId " << amcId
-	  // 	    <<" gebId "<< gebId
-	  // 	    <<" vfatId "<< vfatId
-	  // 	    <<std::endl;
-	  
 	  GEMROmap::dCoord dc = gemROMap->hitPosition(ec);
 	  gemId = dc.gemDetId;
 	  vfatData->setPhiPos((dc.iPhi-1)%maxVFat);
 
-	  // std::cout <<"vfat Id " << gemId
-	  // 	    <<" vfat type "<< dc.vfatType
-	  // 	    <<" phi "<< vfatData->phiPos()
-	  // 	    <<std::endl;
-	  
 	  int nFiredStrips = 0;
 	  for (int chan = 0; chan < VFATdata::nChannels; ++chan) {
 	    uint8_t chan0xf = 0;
@@ -190,51 +181,38 @@ void GEMRawToDigiModule::produce(edm::StreamID iID, edm::Event & iEvent, edm::Ev
 					   <<" chan "<< chMap.chNum
 					   <<" strip "<< stripId
 					   <<" bx "<< digi.bx();
-
-	  std::cout << "bunchCrossing "<< iEvent.bunchCrossing()
-		    << " orbitNumber "<< iEvent.orbitNumber()
-		    << std::endl;
-	  std::cout << "amc13 bunchCrossing "<< amc13Event->bx_id()
-		    << std::endl;
-	  std::cout << "amc   bunchCrossing "<< amcData->bx()
-		    << " orbitNumber "<< amcData->orbitNum()
-		    << std::endl;
-	  
 	    
-	     std::cout <<" vfatId "<<ec.vfatId
-					   <<" gemDetId "<< gemId
-					   <<" chan "<< chMap.chNum
-					   <<" strip "<< stripId
-					   <<" bx "<< digi.bx()
-		       <<std::endl;
-
-	    outGEMDigis.get()->insertDigi(gemId,digi);	    
+	    outGEMDigis.get()->insertDigi(gemId,digi);
+	    
 	  }// end of channel loop
-	  //	  std::cout <<gemId<<  " nFiredStrips "<< nFiredStrips<<std::endl;
+	  
 	  if (unPackStatusDigis_) {
             outVFATStatus.get()->insertDigi(gemId,GEMVfatStatusDigi(*vfatData));
 	  }
 	  
 	} // end of vfat loop
 	
+	gebData->setChamberTrailer(*(++word));
+	
         if (unPackStatusDigis_) {
-	  gebData->setChamberTrailer(*(++word));
 	  outGEBStatus.get()->insertDigi(gemId.chamberId(),GEMGEBStatusDigi(*gebData)); 
         }
 	
       } // end of geb loop
       
+      amcData->setGEMeventTrailer(*(++word));
+      amcData->setAMCTrailer(*(++word));
+      
       if (unPackStatusDigis_) {
-	amcData->setGEMeventTrailer(*(++word));
-	amcData->setAMCTrailer(*(++word));
         outAMCdata.get()->insertDigi(amcData->boardId(), *amcData);
       }
 
     } // end of amc loop
     
+    amc13Event->setAMC13trailer(*(++word));
+    amc13Event->setCDFTrailer(*(++word));
+    
     if (unPackStatusDigis_) {
-      amc13Event->setAMC13trailer(*(++word));
-      amc13Event->setCDFTrailer(*(++word));    
       outAMC13Event.get()->insertDigi(amc13Event->bx_id(), *amc13Event);
     }
     
