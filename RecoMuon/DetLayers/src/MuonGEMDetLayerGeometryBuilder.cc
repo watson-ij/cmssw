@@ -4,6 +4,7 @@
 #include <Geometry/CommonDetUnit/interface/GeomDet.h>
 #include <RecoMuon/DetLayers/interface/MuRingForwardDoubleLayer.h>
 #include <RecoMuon/DetLayers/interface/MuRodBarrelLayer.h>
+#include <RecoMuon/DetLayers/interface/GemDetRing.h>
 #include <RecoMuon/DetLayers/interface/MuDetRing.h>
 #include <RecoMuon/DetLayers/interface/MuDetRod.h>
 
@@ -61,7 +62,7 @@ MuonGEMDetLayerGeometryBuilder::buildLayer(int endcap,vector<int>& rings, int st
   const std::string metname = "Muon|RecoMuon|RecoMuonDetLayers|MuonGEMDetLayerGeometryBuilder";
   MuRingForwardDoubleLayer * result = nullptr;
   vector<const ForwardDetRing*> frontRings, backRings;
-
+  bool complete = true;
 
   for (std::vector<int>::iterator ring=rings.begin(); ring!=rings.end()-2;ring++){ 
 
@@ -90,20 +91,24 @@ MuonGEMDetLayerGeometryBuilder::buildLayer(int endcap,vector<int>& rings, int st
 			      << " at R=" << geomDet->position().perp()
 			      << ", phi=" << geomDet->position().phi()
                               << ", Z=" << geomDet->position().z();
+	  } else {
+	    complete = false;
 	  }
       }
 
       if (!frontDets.empty()) {
 	precomputed_value_sort(frontDets.begin(), frontDets.end(), geomsort::DetPhi());
-	frontRings.push_back(new MuDetRing(frontDets));
+	frontRings.push_back(new GemDetRing(frontDets, complete));
 	LogTrace(metname) << "New front ring with " << frontDets.size()
-			  << " chambers at z="<< frontRings.back()->position().z();
+			  << " chambers at z="<< frontRings.back()->position().z()
+			  << " isComplete ring? " << complete;
       }
       if (!backDets.empty()) {
         precomputed_value_sort(backDets.begin(), backDets.end(), geomsort::DetPhi());
-        backRings.push_back(new MuDetRing(backDets));
+        backRings.push_back(new GemDetRing(backDets, complete));
         LogTrace(metname) << "New back ring with " << backDets.size()
-                          << " chambers at z="<< backRings.back()->position().z();
+                          << " chambers at z="<< backRings.back()->position().z()
+			  << " isComplete ring? " << complete;
       }
 
     }
@@ -111,7 +116,11 @@ MuonGEMDetLayerGeometryBuilder::buildLayer(int endcap,vector<int>& rings, int st
   }
 
   // How should they be sorted?
-  //    precomputed_value_sort(muDetRods.begin(), muDetRods.end(), geomsort::ExtractZ<GeometricSearchDet,float>());                                   
+  //    precomputed_value_sort(muDetRods.begin(), muDetRods.end(), geomsort::ExtractZ<GeometricSearchDet,float>());
+
+  // put them in R order by reversing
+  std::reverse(frontRings.begin(), frontRings.end());
+  std::reverse(backRings.begin(), backRings.end());
   if(!backRings.empty() && !frontRings.empty()) result = new MuRingForwardDoubleLayer(frontRings, backRings);
     else result = nullptr;
   if(result != nullptr){
