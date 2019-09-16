@@ -249,19 +249,19 @@ run3_GEM.toModify( theMixObjects,
         pcrossingFrames = theMixObjects.mixSH.pcrossingFrames + [ 'MuonGEMHits' ]
     )
 )
-from Configuration.Eras.Modifier_phase2_muon_cff import phase2_muon
-phase2_muon.toModify( theMixObjects,
-    mixSH = dict(
-        input = theMixObjects.mixSH.input + [ cms.InputTag("g4SimHits","MuonME0Hits") ],
-        subdets = theMixObjects.mixSH.subdets + [ 'MuonME0Hits' ],
-        crossingFrames = theMixObjects.mixSH.crossingFrames + [ 'MuonME0Hits' ]
-    )
-)
-(premix_stage1 & phase2_muon).toModify(theMixObjects,
-    mixSH = dict(
-        pcrossingFrames = theMixObjects.mixSH.pcrossingFrames + [ 'MuonME0Hits' ]
-    )
-)
+# from Configuration.Eras.Modifier_phase2_muon_cff import phase2_muon
+# phase2_muon.toModify( theMixObjects,
+#     mixSH = dict(
+#         input = theMixObjects.mixSH.input + [ cms.InputTag("g4SimHits","MuonME0Hits") ],
+#         subdets = theMixObjects.mixSH.subdets + [ 'MuonME0Hits' ],
+#         crossingFrames = theMixObjects.mixSH.crossingFrames + [ 'MuonME0Hits' ]
+#     )
+# )
+# (premix_stage1 & phase2_muon).toModify(theMixObjects,
+#     mixSH = dict(
+#         pcrossingFrames = theMixObjects.mixSH.pcrossingFrames + [ 'MuonME0Hits' ]
+#     )
+# )
 from Configuration.Eras.Modifier_phase2_hgcal_cff import phase2_hgcal
 phase2_hgcal.toModify( theMixObjects,
     mixCH = dict(

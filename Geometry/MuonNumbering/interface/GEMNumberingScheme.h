@@ -18,12 +18,19 @@ public:
 
 private:
   void initMe(const MuonDDDConstants& muonConstants);
+  int baseNumberToUnitNumberME0(const MuonBaseNumber& num);
 
   int theRegionLevel;
   int theStationLevel;
   int theRingLevel;
   int theSectorLevel;
   int theRollLevel;
+
+  int theME0RegionLevel;
+  int theME0SectorLevel;
+  int theME0LayerLevel;
+  int theME0RollLevel;
+  int theME0NEtaPart;
 };
 
 #endif

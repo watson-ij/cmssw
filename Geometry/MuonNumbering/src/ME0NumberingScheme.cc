@@ -33,6 +33,8 @@ void ME0NumberingScheme::initMe(const MuonDDDConstants& muonConstants) {
 }
 
 int ME0NumberingScheme::baseNumberToUnitNumber(const MuonBaseNumber& num) {
+  for (auto& n : num.sortedBaseNumber)
+    std::cout<<n.myLevel<<" "<<n.mySuper<<" "<<n.myBase<<", ";
   edm::LogVerbatim("ME0NumberingScheme") << "ME0NumberingScheme::baseNumberToUnitNumber BEGIN ";
   // Debug using LOCAL_DEBUG
 #ifdef LOCAL_DEBUG
@@ -73,6 +75,9 @@ int ME0NumberingScheme::baseNumberToUnitNumber(const MuonBaseNumber& num) {
 #endif
   // -----------------------
 
+  std::cout << "ME0NumberingScheme: Region " << region
+	     << " Layer " << layer << " Chamber " << chamber << " Roll " << roll<<std::endl;
+
   // Build the actual numbering
   ME0DetId id(region, layer, chamber, roll);
 
@@ -81,6 +86,8 @@ int ME0NumberingScheme::baseNumberToUnitNumber(const MuonBaseNumber& num) {
   edm::LogVerbatim("ME0NumberingScheme") << " DetId " << id;
 #endif
   // ---------------------
+
+  return 0/0;
 
   return id.rawId();
 }

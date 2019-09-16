@@ -61,7 +61,6 @@ public:
     return std::make_pair(base_->first, std::make_pair(base_->second.begin(), base_->second.end()));
   }
 
-private:
   BaseIterator base_;
 };
 
@@ -136,7 +135,6 @@ public:
 
   DigiRangeIterator end() const { return data_.end(); }
 
-private:
   typedef std::map<IndexType, std::vector<DigiType> > container;
   container data_;
 

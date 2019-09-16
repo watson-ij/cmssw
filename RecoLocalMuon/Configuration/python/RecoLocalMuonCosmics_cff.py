@@ -51,7 +51,6 @@ muonLocalRecoGRTask = cms.Task(muonlocalrecoTask,muonlocalrecoT0SegTask)
 muonLocalRecoGR = cms.Sequence(muonLocalRecoGRTask)
 
 from RecoLocalMuon.GEMRecHit.gemLocalReco_cff import *
-from RecoLocalMuon.GEMRecHit.me0LocalReco_cff import *
 
 _run2_GEM_2017_muonlocalrecoTask = muonlocalrecoTask.copy()
 _run2_GEM_2017_muonlocalrecoTask.add(gemLocalRecoTask)
@@ -59,15 +58,10 @@ _run2_GEM_2017_muonlocalrecoTask.add(gemLocalRecoTask)
 _run3_muonlocalrecoTask = muonlocalrecoTask.copy()
 _run3_muonlocalrecoTask.add(gemLocalRecoTask)
 
-_phase2_muonlocalrecoTask = _run3_muonlocalrecoTask.copy()
-_phase2_muonlocalrecoTask.add(me0LocalRecoTask)
-
 from Configuration.Eras.Modifier_run2_GEM_2017_cff import run2_GEM_2017
 run2_GEM_2017.toReplaceWith( muonlocalrecoTask , _run2_GEM_2017_muonlocalrecoTask )
 from Configuration.Eras.Modifier_run3_GEM_cff import run3_GEM
 run3_GEM.toReplaceWith( muonlocalrecoTask , _run3_muonlocalrecoTask )
-from Configuration.Eras.Modifier_phase2_muon_cff import phase2_muon
-phase2_muon.toReplaceWith( muonlocalrecoTask , _phase2_muonlocalrecoTask )
 
 
 # RPC New Readout Validation

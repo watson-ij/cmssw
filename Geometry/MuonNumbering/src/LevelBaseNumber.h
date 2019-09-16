@@ -27,7 +27,6 @@ public:
   int super() const { return mySuper; };
   int base() const { return myBase; };
 
-private:
   int myLevel;
   int mySuper;
   int myBase;

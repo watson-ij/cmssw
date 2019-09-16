@@ -84,9 +84,9 @@ from Configuration.Eras.Modifier_stage2L1Trigger_cff import stage2L1Trigger
 #
 stage2L1Trigger.toReplaceWith(SimL1TMuonTask, cms.Task(SimL1TMuonCommonTask, simTwinMuxDigis, simBmtfDigis, simEmtfDigis, simOmtfDigis, simGmtCaloSumDigis, simGmtStage2Digis))
 
-from L1Trigger.ME0Trigger.me0TriggerPseudoDigis_cff import *
-_phase2_SimL1TMuonTask = SimL1TMuonTask.copy()
-_phase2_SimL1TMuonTask.add(me0TriggerPseudoDigiTask)
+# from L1Trigger.ME0Trigger.me0TriggerPseudoDigis_cff import *
+# _phase2_SimL1TMuonTask = SimL1TMuonTask.copy()
+# _phase2_SimL1TMuonTask.add(me0TriggerPseudoDigiTask)
 
-from Configuration.Eras.Modifier_phase2_muon_cff import phase2_muon
-(stage2L1Trigger & phase2_muon).toReplaceWith( SimL1TMuonTask, _phase2_SimL1TMuonTask )
+# from Configuration.Eras.Modifier_phase2_muon_cff import phase2_muon
+# (stage2L1Trigger & phase2_muon).toReplaceWith( SimL1TMuonTask, _phase2_SimL1TMuonTask )

@@ -30,7 +30,6 @@ public:
   int getSuperNo(int level) const;
   int getBaseNo(int level) const;
 
-protected:
   typedef std::vector<LevelBaseNumber> basenumber_type;
   basenumber_type sortedBaseNumber;
 };

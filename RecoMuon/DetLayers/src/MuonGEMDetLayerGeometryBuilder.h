@@ -10,6 +10,7 @@
 
 class DetLayer;
 class MuRingForwardDoubleLayer;
+class MuRingForwardLayer;
 class MuDetRing;
 
 #include <Geometry/GEMGeometry/interface/GEMGeometry.h>
@@ -37,6 +38,12 @@ private:
                                               std::vector<int>& rolls,
                                               const GEMGeometry& geo);
   static bool isFront(const GEMDetId& gemId);
+  static MuRingForwardLayer* buildLayerME0(int endcap,
+					   int layer,
+					   std::vector<int>& chambers,
+					   std::vector<int>& rolls,
+					   const GEMGeometry& geo);
+  static bool isFrontME0(const GEMDetId& gemId);
   static MuDetRing* makeDetRing(std::vector<const GeomDet*>& geomDets);
 };
 #endif

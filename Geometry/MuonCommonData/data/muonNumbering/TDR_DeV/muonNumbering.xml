@@ -509,7 +509,7 @@
    <SpecPar name="MuonME0Sector">
    <PartSelector path="//ME0Box"/>
    <Parameter name="CopyNoTag" value="[m0_sector]"/>
-   <Parameter name="CopyNoOffset" value="1*[super]"/>
+   <Parameter name="CopyNoOffset" value="1*[super]+1"/>
   </SpecPar>
   <SpecPar name="MuonME0Layer">
    <PartSelector path="//ME0L.*"/>
