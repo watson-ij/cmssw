@@ -7,7 +7,7 @@
  */
 #include "ME0SegAlgoRU.h"
 #include "MuonSegFit.h"
-#include "Geometry/GEMGeometry/interface/ME0Layer.h"
+#include "Geometry/GEMGeometry/interface/GEMChamber.h"
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -69,9 +69,9 @@ ME0SegAlgoRU::ME0SegAlgoRU(const edm::ParameterSet& ps) : ME0SegmentAlgorithmBas
   theChamber = nullptr;
 }
 
-std::vector<ME0Segment> ME0SegAlgoRU::run(const ME0Chamber* chamber, const HitAndPositionContainer& rechits) {
+std::vector<GEMSegment> ME0SegAlgoRU::run(const GEMSuperChamber* chamber, const HitAndPositionContainer& rechits) {
 #ifdef EDM_ML_DEBUG  // have lines below only compiled when in debug mode
-  ME0DetId chId(chamber->id());
+  GEMDetId chId(chamber->id());
   edm::LogVerbatim("ME0SegAlgoRU") << "[ME0SegmentAlgorithm::run] build segments in chamber " << chId
                                    << " which contains " << rechits.size() << " rechits";
   for (unsigned int iH = 0; iH < rechits.size(); ++iH) {
@@ -79,13 +79,13 @@ std::vector<ME0Segment> ME0SegAlgoRU::run(const ME0Chamber* chamber, const HitAn
     auto rhLP = rechits[iH].lp;
     edm::LogVerbatim("ME0SegAlgoRU") << "[RecHit :: Loc x = " << std::showpos << std::setw(9) << rhLP.x()
                                      << " Glb y = " << std::showpos << std::setw(9) << rhLP.y()
-                                     << " Time = " << std::showpos << rechits[iH].rh->tof() << " -- " << me0id.rawId()
+                                     << " Time = " << std::showpos << rechits[iH].rh->BunchX() << " -- " << me0id.rawId()
                                      << " = " << me0id << " ]" << std::endl;
   }
 #endif
 
   if (rechits.size() < 3 || rechits.size() > 300) {
-    return std::vector<ME0Segment>();
+    return std::vector<GEMSegment>();
   }
 
   theChamber = chamber;
@@ -111,7 +111,7 @@ std::vector<ME0Segment> ME0SegAlgoRU::run(const ME0Chamber* chamber, const HitAn
   // these.  If they are 'close enough' we build an empty
   // segment.  Then try adding hits to this segment.
 
-  std::vector<ME0Segment> segments;
+  std::vector<GEMSegment> segments;
 
   auto doStd = [&]() {
     for (unsigned int n_seg_min = 6u; n_seg_min >= stdParameters.minNumberOfHits; --n_seg_min)
@@ -130,7 +130,7 @@ std::vector<ME0Segment> ME0SegAlgoRU::run(const ME0Chamber* chamber, const HitAn
 #ifdef EDM_ML_DEBUG  // have lines below only compiled when in debug mode
     for (unsigned int iS = 0; iS < segments.size(); ++iS) {
       const auto& seg = segments[iS];
-      ME0DetId chId(seg.me0DetId());
+      GEMDetId chId(seg.me0DetId());
       const auto& rechits = seg.specificRecHits();
       edm::LogVerbatim("ME0SegAlgoRU") << "[ME0SegAlgoRU] segment in chamber " << chId << " which contains "
                                        << rechits.size() << " rechits and with specs: \n"
@@ -139,7 +139,7 @@ std::vector<ME0Segment> ME0SegAlgoRU::run(const ME0Chamber* chamber, const HitAn
         auto me0id = rh->me0Id();
         edm::LogVerbatim("ME0SegAlgoRU") << "[RecHit :: Loc x = " << std::showpos << std::setw(9)
                                          << rh->localPosition().x() << " Loc y = " << std::showpos << std::setw(9)
-                                         << rh->localPosition().y() << " Time = " << std::showpos << rh->tof() << " -- "
+                                         << rh->localPosition().y() << " Time = " << std::showpos << rh->BunchX() << " -- "
                                          << me0id.rawId() << " = " << me0id << " ]";
       }
     }
@@ -177,7 +177,7 @@ void ME0SegAlgoRU::lookForSegments(const SegmentParameters& params,
                                    const HitAndPositionContainer& rechits,
                                    const std::vector<unsigned int>& recHits_per_layer,
                                    BoolContainer& used,
-                                   std::vector<ME0Segment>& segments) const {
+                                   std::vector<GEMSegment>& segments) const {
   auto ib = rechits.begin();
   auto ie = rechits.end();
   std::vector<std::pair<float, HitAndPositionPtrContainer> > proto_segments;
@@ -207,8 +207,8 @@ void ME0SegAlgoRU::lookForSegments(const SegmentParameters& params,
       if ((std::abs(int(h2.layer) - int(h1.layer)) + 1) < int(n_seg_min))
         break;
 
-      if (std::fabs(h1.rh->tof() - h2.rh->tof()) > params.maxTOFDiff + 1.0)
-        continue;
+      // if (std::fabs(h1.rh->BunchX() - h2.rh->BunchX()) > params.maxTOFDiff + 1.0)
+      //   continue;
       if (!areHitsCloseInEta(params.maxETASeeds, params.requireBeamConstr, h1.gp, h2.gp))
         continue;
       if (!areHitsCloseInGlobalPhi(params.maxPhiSeeds, abs(int(h2.layer) - int(h1.layer)), h1.gp, h2.gp))
@@ -246,16 +246,17 @@ void ME0SegAlgoRU::lookForSegments(const SegmentParameters& params,
         continue;
 
       if (params.requireCentralBX) {
-        int nCentral = 0;
-        int nNonCentral = 0;
-        for (const auto* rh : current_proto_segment) {
-          if (std::fabs(rh->rh->tof()) < 2)
-            nCentral++;
-          else
-            nNonCentral++;
-        }
-        if (nNonCentral >= nCentral)
-          continue;
+	// TODO: bx == 0?
+        // int nCentral = 0;
+        // int nNonCentral = 0;
+        // for (const auto* rh : current_proto_segment) {
+        //   if (std::fabs(rh->rh->BunchX()) < 2)
+        //     nCentral++;
+        //   else
+        //     nNonCentral++;
+        // }
+        // if (nNonCentral >= nCentral)
+        //   continue;
       }
       //        	segok = true;
 
@@ -266,7 +267,7 @@ void ME0SegAlgoRU::lookForSegments(const SegmentParameters& params,
 }
 
 void ME0SegAlgoRU::addUniqueSegments(SegmentByMetricContainer& proto_segments,
-                                     std::vector<ME0Segment>& segments,
+                                     std::vector<GEMSegment>& segments,
                                      BoolContainer& used) const {
   std::sort(proto_segments.begin(),
             proto_segments.end(),
@@ -297,37 +298,54 @@ void ME0SegAlgoRU::addUniqueSegments(SegmentByMetricContainer& proto_segments,
 
     std::unique_ptr<MuonSegFit> current_fit = makeFit(currentProtoSegment);
 
+    // // Create an actual ME0Segment - retrieve all info from the fit
+    // // calculate the timing fron rec hits associated to the TrackingRecHits used
+    // // to fit the segment
+    // float averageTime = 0.;
+    // for (const auto* h : currentProtoSegment) {
+    //   averageTime += h->rh->BunchX();
+    // }
+    // averageTime /= float(currentProtoSegment.size());
+    // float timeUncrt = 0.;
+    // for (const auto* h : currentProtoSegment) {
+    //   timeUncrt += (h->rh->BunchX() - averageTime) * (h->rh->BunchX() - averageTime);
+    // }
+    // timeUncrt = std::sqrt(timeUncrt / float(currentProtoSegment.size() - 1));
+
+
     // Create an actual ME0Segment - retrieve all info from the fit
     // calculate the timing fron rec hits associated to the TrackingRecHits used
     // to fit the segment
     float averageTime = 0.;
     for (const auto* h : currentProtoSegment) {
-      averageTime += h->rh->tof();
+      averageTime += h->rh->BunchX();
     }
-    averageTime /= float(currentProtoSegment.size());
-    float timeUncrt = 0.;
+    averageTime /= int(currentProtoSegment.size());
+    int timeUncrt = 0.;
     for (const auto* h : currentProtoSegment) {
-      timeUncrt += (h->rh->tof() - averageTime) * (h->rh->tof() - averageTime);
+      timeUncrt += (h->rh->BunchX() - averageTime) * (h->rh->BunchX() - averageTime);
     }
     timeUncrt = std::sqrt(timeUncrt / float(currentProtoSegment.size() - 1));
 
+    
     std::sort(currentProtoSegment.begin(),
               currentProtoSegment.end(),
               [](const HitAndPosition* a, const HitAndPosition* b) { return a->layer < b->layer; });
 
-    std::vector<const ME0RecHit*> bareRHs;
+    std::vector<const GEMRecHit*> bareRHs;
     bareRHs.reserve(currentProtoSegment.size());
     for (const auto* rh : currentProtoSegment)
       bareRHs.push_back(rh->rh);
     const float dPhi = theChamber->computeDeltaPhi(current_fit->intercept(), current_fit->localdir());
-    ME0Segment temp(bareRHs,
+    GEMSegment temp(bareRHs,
                     current_fit->intercept(),
                     current_fit->localdir(),
                     current_fit->covarianceMatrix(),
                     current_fit->chi2(),
                     averageTime,
-                    timeUncrt,
-                    dPhi);
+                    timeUncrt
+                    // dPhi // TODO FIXME!
+		    );
     segments.push_back(temp);
   }
 }
@@ -418,9 +436,9 @@ bool ME0SegAlgoRU::areHitsConsistentInTime(const float maxTOF,
                                            const HitAndPosition& h) const {
   std::vector<float> tofs;
   tofs.reserve(proto_segment.size() + 1);
-  tofs.push_back(h.rh->tof());
+  tofs.push_back(h.rh->BunchX());
   for (const auto* ih : proto_segment)
-    tofs.push_back(ih->rh->tof());
+    tofs.push_back(ih->rh->BunchX());
   std::sort(tofs.begin(), tofs.end());
   if (std::fabs(tofs.front() - tofs.back()) < maxTOF + 1.0)
     return true;
@@ -445,7 +463,7 @@ std::unique_ptr<MuonSegFit> ME0SegAlgoRU::makeFit(const HitAndPositionPtrContain
   // the local rest frame is the ME0Chamber
   MuonSegFit::MuonRecHitContainer muonRecHits;
   for (auto rh = proto_segment.begin(); rh < proto_segment.end(); rh++) {
-    ME0RecHit* newRH = (*rh)->rh->clone();
+    GEMRecHit* newRH = (*rh)->rh->clone();
     newRH->setPosition((*rh)->lp);
     MuonSegFit::MuonRecHitPtr trkRecHit(newRH);
     muonRecHits.push_back(trkRecHit);
@@ -477,7 +495,7 @@ void ME0SegAlgoRU::pruneBadHits(const float maxChi2,
   }
 }
 
-float ME0SegAlgoRU::getHitSegChi2(const std::unique_ptr<MuonSegFit>& fit, const ME0RecHit& hit) const {
+float ME0SegAlgoRU::getHitSegChi2(const std::unique_ptr<MuonSegFit>& fit, const GEMRecHit& hit) const {
   const auto lp = hit.localPosition();
   const auto le = hit.localPositionError();
   const float du = fit->xdev(lp.x(), lp.z());
@@ -524,9 +542,9 @@ void ME0SegAlgoRU::compareProtoSegment(std::unique_ptr<MuonSegFit>& current_fit,
     float avgtof = 0;
     for (const auto* h : current_proto_segment)
       if (old_hit != h)
-        avgtof += h->rh->tof();
+        avgtof += h->rh->BunchX();
     avgtof /= float(current_proto_segment.size() - 1);
-    if (std::abs(avgtof - new_hit.rh->tof()) < std::abs(avgtof - old_hit->rh->tof()))
+    if (std::abs(avgtof - new_hit.rh->BunchX()) < std::abs(avgtof - old_hit->rh->BunchX()))
       useNew = true;
   }  //otherwise base it on chi2
   else if (new_fit->chi2() < current_fit->chi2())

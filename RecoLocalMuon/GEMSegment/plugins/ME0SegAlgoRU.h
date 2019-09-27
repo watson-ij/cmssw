@@ -22,7 +22,7 @@
  */
 
 #include <RecoLocalMuon/GEMSegment/plugins/ME0SegmentAlgorithmBase.h>
-#include <DataFormats/GEMRecHit/interface/ME0RecHit.h>
+#include <DataFormats/GEMRecHit/interface/GEMRecHit.h>
 #include "MuonSegFit.h"
 
 #include <vector>
@@ -55,7 +55,7 @@ public:
   /**
 	 * Here we must implement the algorithm
 	 */
-  std::vector<ME0Segment> run(const ME0Chamber* chamber, const HitAndPositionContainer& rechits) override;
+  std::vector<GEMSegment> run(const GEMSuperChamber* chamber, const HitAndPositionContainer& rechits) override;
 
 private:
   //Look for segments that have at least "n_seg_min" consituents and following the associated paramters
@@ -64,7 +64,7 @@ private:
                        const HitAndPositionContainer& rechits,
                        const std::vector<unsigned int>& recHits_per_layer,
                        BoolContainer& used,
-                       std::vector<ME0Segment>& segments) const;
+                       std::vector<GEMSegment>& segments) const;
   //Look for any hits between the two seed hits consistent with a segment
   void tryAddingHitsToSegment(const float maxTOF,
                               const float maxETA,
@@ -82,7 +82,7 @@ private:
                     const unsigned int n_seg_min) const;
   //Remove any overlapping segments by which has the lowset chi2
   void addUniqueSegments(SegmentByMetricContainer& proto_segments,
-                         std::vector<ME0Segment>& segments,
+                         std::vector<GEMSegment>& segments,
                          BoolContainer& used) const;
 
   //Are the two seed hits consistent spatially?
@@ -110,7 +110,7 @@ private:
                         const HitAndPositionPtrContainer& proto_segment,
                         const HitAndPosition& h) const;
   //Return a chi2 for a hit and a predicted segment extrapolation
-  float getHitSegChi2(const std::unique_ptr<MuonSegFit>& fit, const ME0RecHit& hit) const;
+  float getHitSegChi2(const std::unique_ptr<MuonSegFit>& fit, const GEMRecHit& hit) const;
   //Global point of a segment extrapolated to a Z value
   GlobalPoint globalAtZ(const std::unique_ptr<MuonSegFit>& fit, float z) const;
 
@@ -133,7 +133,7 @@ private:
   SegmentParameters wideParameters;
 
   //Objects used to produce the segments
-  const ME0Chamber* theChamber;
+  const GEMSuperChamber* theChamber;
 };
 
 #endif

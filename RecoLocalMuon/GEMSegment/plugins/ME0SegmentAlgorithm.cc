@@ -48,7 +48,7 @@ ME0SegmentAlgorithm::ME0SegmentAlgorithm(const edm::ParameterSet& ps)
  */
 ME0SegmentAlgorithm::~ME0SegmentAlgorithm() {}
 
-std::vector<ME0Segment> ME0SegmentAlgorithm::run(const ME0Chamber* chamber, const HitAndPositionContainer& rechits) {
+std::vector<GEMSegment> ME0SegmentAlgorithm::run(const GEMSuperChamber* chamber, const HitAndPositionContainer& rechits) {
 #ifdef EDM_ML_DEBUG  // have lines below only compiled when in debug mode
   ME0DetId chId(chamber->id());
   edm::LogVerbatim("ME0SegAlgoMM") << "[ME0SegmentAlgorithm::run] build segments in chamber " << chId
@@ -58,14 +58,14 @@ std::vector<ME0Segment> ME0SegmentAlgorithm::run(const ME0Chamber* chamber, cons
     auto rhLP = rh->lp;
     edm::LogVerbatim("ME0SegmentAlgorithm")
         << "[RecHit :: Loc x = " << std::showpos << std::setw(9) << rhLP.x() << " Loc y = " << std::showpos
-        << std::setw(9) << rhLP.y() << " Time = " << std::showpos << rh->rh->tof() << " -- " << me0id.rawId() << " = "
+        << std::setw(9) << rhLP.y() << " Time = " << std::showpos << rh->rh->BunchX() << " -- " << me0id.rawId() << " = "
         << me0id << " ]";
   }
 #endif
 
   // pre-cluster rechits and loop over all sub clusters separately
-  std::vector<ME0Segment> segments_temp;
-  std::vector<ME0Segment> segments;
+  std::vector<GEMSegment> segments_temp;
+  std::vector<GEMSegment> segments;
   ProtoSegments rechits_clusters;  // this is a collection of groups of rechits
 
   if (preClustering) {
@@ -211,7 +211,7 @@ ME0SegmentAlgorithm::ProtoSegments ME0SegmentAlgorithm::clusterHits(const HitAnd
   return rechits_clusters;
 }
 
-ME0SegmentAlgorithm::ProtoSegments ME0SegmentAlgorithm::chainHits(const ME0Chamber* chamber,
+ME0SegmentAlgorithm::ProtoSegments ME0SegmentAlgorithm::chainHits(const GEMSuperChamber* chamber,
                                                                   const HitAndPositionContainer& rechits) {
   ProtoSegments rechits_chains;
   ProtoSegments seeds;
@@ -222,7 +222,7 @@ ME0SegmentAlgorithm::ProtoSegments ME0SegmentAlgorithm::chainHits(const ME0Chamb
   // Loop over rechits
   // Create one seed per hit
   for (unsigned int i = 0; i < rechits.size(); ++i) {
-    if (std::abs(rechits[i].rh->tof()) > dTimeChainBoxMax)
+    if (std::abs(rechits[i].rh->BunchX()) > dTimeChainBoxMax)
       continue;
     seeds.push_back(HitAndPositionPtrContainer(1, &rechits[i]));
   }
@@ -276,7 +276,7 @@ ME0SegmentAlgorithm::ProtoSegments ME0SegmentAlgorithm::chainHits(const ME0Chamb
   return rechits_chains;
 }
 
-bool ME0SegmentAlgorithm::isGoodToMerge(const ME0Chamber* chamber,
+bool ME0SegmentAlgorithm::isGoodToMerge(const GEMSuperChamber* chamber,
                                         const HitAndPositionPtrContainer& newChain,
                                         const HitAndPositionPtrContainer& oldChain) {
   for (size_t iRH_new = 0; iRH_new < newChain.size(); ++iRH_new) {
@@ -302,7 +302,7 @@ bool ME0SegmentAlgorithm::isGoodToMerge(const ME0Chamber* chamber,
         continue;
       // and they should have a time difference compatible with the hypothesis
       // that the rechits originate from the same particle, but were detected in different layers
-      if (std::abs(newChain[iRH_new]->rh->tof() - oldChain[iRH_old]->rh->tof()) >= dTimeChainBoxMax)
+      if (std::abs(newChain[iRH_new]->rh->BunchX() - oldChain[iRH_old]->rh->BunchX()) >= dTimeChainBoxMax)
         continue;
 
       return true;
@@ -311,9 +311,9 @@ bool ME0SegmentAlgorithm::isGoodToMerge(const ME0Chamber* chamber,
   return false;
 }
 
-void ME0SegmentAlgorithm::buildSegments(const ME0Chamber* chamber,
+void ME0SegmentAlgorithm::buildSegments(const GEMSuperChamber* chamber,
                                         const HitAndPositionPtrContainer& rechits,
-                                        std::vector<ME0Segment>& me0segs) {
+                                        std::vector<GEMSegment>& me0segs) {
   if (rechits.size() < minHitsPerSegment)
     return;
 
@@ -326,19 +326,19 @@ void ME0SegmentAlgorithm::buildSegments(const ME0Chamber* chamber,
     auto rhLP = (*rh)->lp;
     edm::LogVerbatim("ME0SegmentAlgorithm")
         << "[RecHit :: Loc x = " << std::showpos << std::setw(9) << rhLP.x() << " Loc y = " << std::showpos
-        << std::setw(9) << rhLP.y() << " Time = " << std::showpos << (*rh)->rh->tof() << " -- " << me0id.rawId()
+        << std::setw(9) << rhLP.y() << " Time = " << std::showpos << (*rh)->rh->BunchX() << " -- " << me0id.rawId()
         << " = " << me0id << " ]";
   }
 #endif
 
   MuonSegFit::MuonRecHitContainer muonRecHits;
-  std::vector<const ME0RecHit*> bareRHs;
+  std::vector<const GEMRecHit*> bareRHs;
 
   // select hits from the ensemble and sort it
   for (auto rh = rechits.begin(); rh != rechits.end(); rh++) {
     bareRHs.push_back((*rh)->rh);
     // for segFit - using local point in chamber frame
-    ME0RecHit* newRH = (*rh)->rh->clone();
+    GEMRecHit* newRH = (*rh)->rh->clone();
     newRH->setPosition((*rh)->lp);
 
     MuonSegFit::MuonRecHitPtr trkRecHit(newRH);
@@ -365,13 +365,13 @@ void ME0SegmentAlgorithm::buildSegments(const ME0Chamber* chamber,
   // Calculate the central value and uncertainty of the segment time
   float averageTime = 0.;
   for (auto rh = rechits.begin(); rh != rechits.end(); ++rh) {
-    averageTime += (*rh)->rh->tof();
+    averageTime += (*rh)->rh->BunchX();
   }
   if (!rechits.empty())
     averageTime = averageTime / (rechits.size());
   float timeUncrt = 0.;
   for (auto rh = rechits.begin(); rh != rechits.end(); ++rh) {
-    timeUncrt += pow((*rh)->rh->tof() - averageTime, 2);
+    timeUncrt += pow((*rh)->rh->BunchX() - averageTime, 2);
   }
 
   if (rechits.size() > 1)
@@ -384,7 +384,7 @@ void ME0SegmentAlgorithm::buildSegments(const ME0Chamber* chamber,
   edm::LogVerbatim("ME0SegmentAlgorithm")
       << "[ME0SegmentAlgorithm::buildSegments] will now try to make ME0Segment from collection of " << rechits.size()
       << " ME0 RecHits";
-  ME0Segment tmp(bareRHs, protoIntercept, protoDirection, protoErrors, protoChi2, averageTime, timeUncrt, dPhi);
+  GEMSegment tmp(bareRHs, protoIntercept, protoDirection, protoErrors, protoChi2, averageTime, timeUncrt/*, dPhi // TODO FIXME */);
 
   edm::LogVerbatim("ME0SegmentAlgorithm") << "[ME0SegmentAlgorithm::buildSegments] ME0Segment made";
   edm::LogVerbatim("ME0SegmentAlgorithm") << "[ME0SegmentAlgorithm::buildSegments] " << tmp;

@@ -12,10 +12,10 @@
  *
  */
 
-#include "DataFormats/GEMRecHit/interface/ME0RecHitCollection.h"
-#include "DataFormats/GEMRecHit/interface/ME0Segment.h"
-#include "Geometry/GEMGeometry/interface/ME0EtaPartition.h"
-#include "Geometry/GEMGeometry/interface/ME0Chamber.h"
+#include "DataFormats/GEMRecHit/interface/GEMRecHitCollection.h"
+#include "DataFormats/GEMRecHit/interface/GEMSegment.h"
+#include "Geometry/GEMGeometry/interface/GEMEtaPartition.h"
+#include "Geometry/GEMGeometry/interface/GEMSuperChamber.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include <map>
 #include <vector>
@@ -23,9 +23,9 @@
 class ME0SegmentAlgorithmBase {
 public:
   struct HitAndPosition {
-    HitAndPosition(const ME0RecHit* rh, const LocalPoint& lp, const GlobalPoint& gp, unsigned int idx)
-        : rh(rh), lp(lp), gp(gp), layer(rh->me0Id().layer()), idx(idx) {}
-    const ME0RecHit* rh;
+    HitAndPosition(const GEMRecHit* rh, const LocalPoint& lp, const GlobalPoint& gp, unsigned int idx)
+        : rh(rh), lp(lp), gp(gp), layer(rh->gemId().layer()), idx(idx) {}
+    const GEMRecHit* rh;
     LocalPoint lp;
     GlobalPoint gp;
     unsigned int layer;
@@ -42,7 +42,7 @@ public:
 
   /** Run the algorithm = build the segments in this chamber
     */
-  virtual std::vector<ME0Segment> run(const ME0Chamber* chamber, const HitAndPositionContainer& rechits) = 0;
+  virtual std::vector<GEMSegment> run(const GEMSuperChamber* chamber, const HitAndPositionContainer& rechits) = 0;
 
 private:
 };

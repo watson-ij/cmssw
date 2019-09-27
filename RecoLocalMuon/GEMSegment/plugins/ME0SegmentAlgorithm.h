@@ -14,7 +14,7 @@
 
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "RecoLocalMuon/GEMSegment/plugins/ME0SegmentAlgorithmBase.h"
-#include "DataFormats/GEMRecHit/interface/ME0RecHit.h"
+#include "DataFormats/GEMRecHit/interface/GEMRecHit.h"
 
 #include <deque>
 #include <vector>
@@ -34,7 +34,7 @@ public:
   /**
    * Build segments for all desired groups of hits
    */
-  std::vector<ME0Segment> run(const ME0Chamber* chamber, const HitAndPositionContainer& rechits) override;
+  std::vector<GEMSegment> run(const GEMSuperChamber* chamber, const HitAndPositionContainer& rechits) override;
 
 private:
   /// Utility functions
@@ -43,16 +43,16 @@ private:
   ProtoSegments clusterHits(const HitAndPositionContainer& rechits);
 
   // Build groups of rechits that are separated in strip numbers and Z to save time on the segment finding
-  ProtoSegments chainHits(const ME0Chamber* chamber, const HitAndPositionContainer& rechits);
+  ProtoSegments chainHits(const GEMSuperChamber* chamber, const HitAndPositionContainer& rechits);
 
-  bool isGoodToMerge(const ME0Chamber* chamber,
+  bool isGoodToMerge(const GEMSuperChamber* chamber,
                      const HitAndPositionPtrContainer& newChain,
                      const HitAndPositionPtrContainer& oldChain);
 
   // Build track segments in this chamber (this is where the actual segment-building algorithm hides.)
-  void buildSegments(const ME0Chamber* chamber,
+  void buildSegments(const GEMSuperChamber* chamber,
                      const HitAndPositionPtrContainer& rechits,
-                     std::vector<ME0Segment>& me0segs);
+                     std::vector<GEMSegment>& me0segs);
 
   // Member variables
   const std::string myName;

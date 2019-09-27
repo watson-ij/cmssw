@@ -49,7 +49,7 @@ run2_common.toModify( muonDetIdAssociator, includeBadChambers = True )
 from Configuration.Eras.Modifier_run3_GEM_cff import run3_GEM
 run3_GEM.toModify( muonDetIdAssociator, includeGEM = True )
 from Configuration.Eras.Modifier_phase2_muon_cff import phase2_muon
-phase2_muon.toModify( muonDetIdAssociator, includeME0 = True )
+# phase2_muon.toModify( muonDetIdAssociator, includeME0 = True )
 phase2_muon.toModify( hcalDetIdAssociator, hcalRegion = 1 )
 
 preshowerDetIdAssociator = cms.ESProducer("DetIdAssociatorESProducer",

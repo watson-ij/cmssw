@@ -1,9 +1,9 @@
 #include "RecoLocalMuon/GEMSegment/plugins/ME0SegmentBuilder.h"
-#include "DataFormats/MuonDetId/interface/ME0DetId.h"
-#include "DataFormats/GEMRecHit/interface/ME0RecHit.h"
-#include "Geometry/GEMGeometry/interface/ME0Geometry.h"
-#include "Geometry/GEMGeometry/interface/ME0EtaPartition.h"
-#include "Geometry/GEMGeometry/interface/ME0Chamber.h"
+#include "DataFormats/MuonDetId/interface/GEMDetId.h"
+#include "DataFormats/GEMRecHit/interface/GEMRecHit.h"
+#include "Geometry/GEMGeometry/interface/GEMGeometry.h"
+#include "Geometry/GEMGeometry/interface/GEMEtaPartition.h"
+#include "Geometry/GEMGeometry/interface/GEMSuperChamber.h"
 #include "RecoLocalMuon/GEMSegment/plugins/ME0SegmentAlgorithmBase.h"
 #include "RecoLocalMuon/GEMSegment/plugins/ME0SegmentBuilderPluginFactory.h"
 
@@ -27,23 +27,23 @@ ME0SegmentBuilder::ME0SegmentBuilder(const edm::ParameterSet& ps) : geom_(nullpt
 
 ME0SegmentBuilder::~ME0SegmentBuilder() {}
 
-void ME0SegmentBuilder::build(const ME0RecHitCollection* recHits, ME0SegmentCollection& oc) {
+void ME0SegmentBuilder::build(const GEMRecHitCollection* recHits, GEMSegmentCollection& oc) {
   LogDebug("ME0SegmentBuilder") << "Total number of rechits in this event: " << recHits->size();
 
-  std::map<ME0DetId, bool> foundChambers;
-  for (ME0RecHitCollection::const_iterator it = recHits->begin(); it != recHits->end(); it++) {
-    const auto chId = it->me0Id().chamberId();
+  std::map<GEMDetId, bool> foundChambers;
+  for (GEMRecHitCollection::const_iterator it = recHits->begin(); it != recHits->end(); it++) {
+    const auto chId = it->gemId().chamberId();
     auto chIt = foundChambers.find(chId);
     if (chIt != foundChambers.end())
       continue;
     foundChambers[chId] = true;
     ME0SegmentAlgorithmBase::HitAndPositionContainer hitAndPositions;
-    const ME0Chamber* chamber = geom_->chamber(chId);
-    for (ME0RecHitCollection::const_iterator it2 = it; it2 != recHits->end(); it2++) {
-      if (it2->me0Id().chamberId() != chId)
+    const GEMSuperChamber* chamber = geom_->superChamber(chId);
+    for (GEMRecHitCollection::const_iterator it2 = it; it2 != recHits->end(); it2++) {
+      if (it2->gemId().chamberId() != chId)
         continue;
 
-      const auto* part = geom_->etaPartition(it2->me0Id());
+      const auto* part = geom_->etaPartition(it2->gemId());
       GlobalPoint glb = part->toGlobal(it2->localPosition());
       LocalPoint nLoc = chamber->toLocal(glb);
       hitAndPositions.emplace_back(&(*it2), nLoc, glb, hitAndPositions.size());
@@ -51,8 +51,8 @@ void ME0SegmentBuilder::build(const ME0RecHitCollection* recHits, ME0SegmentColl
 
     LogDebug("ME0Segment|ME0") << "found " << hitAndPositions.size() << " rechits in chamber " << chId;
     //sort by layer
-    auto getLayer = [&](int iL) -> const ME0Layer* {  //function is broken in the geo currently
-      for (auto layer : chamber->layers()) {
+    auto getLayer = [&](int iL) -> const GEMChamber* {  //function is broken in the geo currently
+      for (auto layer : chamber->chambers()) {
         if (layer->id().layer() == iL)
           return layer;
       }
@@ -72,7 +72,7 @@ void ME0SegmentBuilder::build(const ME0RecHitCollection* recHits, ME0SegmentColl
                    const ME0SegmentAlgorithmBase::HitAndPosition& h2) { return h1.layer > h2.layer; });
 
     // given the chamber select the appropriate algo... and run it
-    std::vector<ME0Segment> segv = algo->run(chamber, hitAndPositions);
+    std::vector<GEMSegment> segv = algo->run(chamber, hitAndPositions);
 
     LogDebug("ME0Segment|ME0") << "found " << segv.size() << " segments in chamber " << chId;
 
@@ -82,4 +82,4 @@ void ME0SegmentBuilder::build(const ME0RecHitCollection* recHits, ME0SegmentColl
   }
 }
 
-void ME0SegmentBuilder::setGeometry(const ME0Geometry* geom) { geom_ = geom; }
+void ME0SegmentBuilder::setGeometry(const GEMGeometry* geom) { geom_ = geom; }

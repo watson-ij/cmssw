@@ -12,7 +12,7 @@ gemSegments = cms.EDProducer("GEMSegmentProducer",
         preClusteringUseChaining = cms.bool(True), # True ==> use Chaining() , False ==> use Clustering() Fnct
         dPhiChainBoxMax = cms.double(.02),         # Chain Hit dPhi
         dEtaChainBoxMax = cms.double(.05),         # Chain Hit dEta
-        maxRecHitsInCluster = cms.int32(4),        # Does 4 make sense here?
+        maxRecHitsInCluster = cms.int32(12),        # Does 4 make sense here?
         clusterOnlySameBXRecHits = cms.bool(True), # only working for (preClustering && preClusteringUseChaining)
     ),
 )
