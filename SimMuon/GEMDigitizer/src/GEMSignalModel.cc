@@ -131,6 +131,8 @@ std::vector<std::pair<int, int> > GEMSignalModel::simulateClustering(const Trape
                                                                      const PSimHit* simHit,
                                                                      const int bx,
                                                                      CLHEP::HepRandomEngine* engine) {
+  const GEMDetId gemId(simHit->detUnitId());
+  
   const LocalPoint& hit_entry(simHit->entryPoint());
   const LocalPoint& hit_exit(simHit->exitPoint());
 
@@ -143,9 +145,14 @@ std::vector<std::pair<int, int> > GEMSignalModel::simulateClustering(const Trape
     end_point = hit_entry;
   }
 
+  float smeared_start_x = 0.;
+  float smeared_end_x = 0.;
+  
   // Add Gaussian noise to the points towards outside.
-  float smeared_start_x = start_point.x() - std::abs(CLHEP::RandGaussQ::shoot(engine, 0, resolutionX_));
-  float smeared_end_x = end_point.x() + std::abs(CLHEP::RandGaussQ::shoot(engine, 0, resolutionX_));
+  if (gemId.station() != 0) {
+    smeared_start_x = start_point.x() - std::abs(CLHEP::RandGaussQ::shoot(engine, 0, resolutionX_));
+    smeared_end_x = end_point.x() + std::abs(CLHEP::RandGaussQ::shoot(engine, 0, resolutionX_));
+  }
 
   LocalPoint smeared_start_point(smeared_start_x, start_point.y(), start_point.z());
   LocalPoint smeared_end_point(smeared_end_x, end_point.y(), end_point.z());

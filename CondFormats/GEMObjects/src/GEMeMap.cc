@@ -79,15 +79,19 @@ void GEMeMap::convertDummy(GEMROMapping& romap) {
   uint8_t gebId = 0;
 
   for (int re = -1; re <= 1; re = re + 2) {
-    for (int st = GEMDetId::minStationId; st <= GEMDetId::maxStationId; ++st) {
+    // TODO : Need a switch for this?
+    for (int st = GEMDetId::minStationId0; st <= GEMDetId::maxStationId; ++st) {
       int maxVFat = maxVFatGE11_;
-      if (st == 2)
+      int maxLayerId = GEMDetId::maxLayerId;
+      if (st == 2) {
         maxVFat = maxVFatGE21_;
-      if (st == 0)
+      } else if (st == 0) {
         maxVFat = maxVFatGE0_;
-
+	maxLayerId = GEMDetId::maxLayerId0;
+      }
+      
       for (int ch = 1; ch <= GEMDetId::maxChamberId; ++ch) {
-        for (int ly = 1; ly <= GEMDetId::maxLayerId; ++ly) {
+        for (int ly = 1; ly <= maxLayerId; ++ly) {
           GEMDetId gemId(re, 1, st, ly, ch, 0);
 
           GEMROMapping::chamEC ec;

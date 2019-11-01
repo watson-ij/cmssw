@@ -42,6 +42,7 @@ void GEMRecHitTrackMatch::bookHistograms(DQMStore::IBooker &ibooker,
   using namespace GEMDetLabel;
 
   nstation = geom.regions()[0]->stations().size();
+  nstation = 3;
   for (unsigned int j = 0; j < nstation; j++) {
     string track_eta_name = string("track_eta") + s_suffix.at(j);
     string track_eta_title = string("track_eta") + ";SimTrack |#eta|;# of tracks";
@@ -131,21 +132,21 @@ void GEMRecHitTrackMatch::analyze(const edm::Event &iEvent, const edm::EventSetu
     for (auto d : gem_sh_ids_ch) {
       const GEMDetId id(d);
       if (id.chamber() % 2 == 0)
-        track_.hitEven[id.station() - 1] = true;
+        track_.hitEven[id.station()] = true;
       else if (id.chamber() % 2 == 1)
-        track_.hitOdd[id.station() - 1] = true;
+        track_.hitOdd[id.station()] = true;
       else {
         edm::LogInfo("GEMRecHitTrackMatch") << "Error to get chamber id" << std::endl;
       }
 
-      track_.gem_sh[id.station() - 1][(id.layer() - 1)] = true;
+      track_.gem_sh[id.station()][(id.layer() - 1)] = true;
     }
     // ** GEM RecHits ** //
     const auto gem_rh_ids_ch = match_rh.chamberIds();
 
     for (auto d : gem_rh_ids_ch) {
       const GEMDetId id(d);
-      track_.gem_rh[id.station() - 1][(id.layer() - 1)] = true;
+      track_.gem_rh[id.station()][(id.layer() - 1)] = true;
     }
 
     FillWithTrigger(track_eta, fabs(track_.eta));

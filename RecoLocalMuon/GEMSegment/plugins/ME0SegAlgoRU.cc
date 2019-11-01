@@ -72,8 +72,8 @@ ME0SegAlgoRU::ME0SegAlgoRU(const edm::ParameterSet& ps) : ME0SegmentAlgorithmBas
 std::vector<GEMSegment> ME0SegAlgoRU::run(const GEMSuperChamber* chamber, const HitAndPositionContainer& rechits) {
 #ifdef EDM_ML_DEBUG  // have lines below only compiled when in debug mode
   GEMDetId chId(chamber->id());
-  edm::LogVerbatim("ME0SegAlgoRU") << "[ME0SegmentAlgorithm::run] build segments in chamber " << chId
-                                   << " which contains " << rechits.size() << " rechits";
+  std::cout << "[ME0SegmentAlgorithm::run] build segments in chamber " << chId
+                                   << " which contains " << rechits.size() << " rechits" << std::endl;
   for (unsigned int iH = 0; iH < rechits.size(); ++iH) {
     auto me0id = rechits[iH].rh->me0Id();
     auto rhLP = rechits[iH].lp;
@@ -83,6 +83,9 @@ std::vector<GEMSegment> ME0SegAlgoRU::run(const GEMSuperChamber* chamber, const 
                                      << " = " << me0id << " ]" << std::endl;
   }
 #endif
+  GEMDetId chId(chamber->id());
+  std::cout << "[ME0SegmentAlgorithm::run] build segments in chamber " << chId
+                                   << " which contains " << rechits.size() << " rechits" << std::endl;
 
   if (rechits.size() < 3 || rechits.size() > 300) {
     return std::vector<GEMSegment>();

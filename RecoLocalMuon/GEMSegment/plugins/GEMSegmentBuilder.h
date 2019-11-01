@@ -19,6 +19,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 class GEMSegmentAlgorithmBase;
+class ME0SegmentAlgorithmBase;
 
 class GEMSegmentBuilder {
 public:
@@ -43,6 +44,11 @@ private:
   std::string algoName;
   edm::ParameterSet segAlgoPSet;
   std::unique_ptr<GEMSegmentAlgorithmBase> algo;
+
+  std::string me0algoName;
+  edm::ParameterSet me0segAlgoPSet;
+  std::unique_ptr<ME0SegmentAlgorithmBase> me0algo;
+  
   const GEMGeometry* geom_;
 };
 

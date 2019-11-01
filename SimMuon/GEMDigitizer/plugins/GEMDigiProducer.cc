@@ -179,6 +179,11 @@ void GEMDigiProducer::produce(edm::Event& e, const edm::EventSetup& eventSetup) 
     (*gemDigiSimLinks).insert(gemDigiModule_->gemDigiSimLinks());
   }
 
+  for (auto& [d, dd] : digis->data_) {
+    if (d.station() == 0)
+      std::cout << "digis " << d.chamber() << " -- n: " << dd.size() << std::endl;
+  }
+
   // store them in the event
   e.put(std::move(digis));
   e.put(std::move(stripDigiSimLinks), "GEM");

@@ -44,6 +44,7 @@ void GEMBkgModel::simulate(const GEMEtaPartition* roll,
                            Strips& strips_,
                            DetectorHitMap& detectorHitMap_) {
   const GEMDetId& gemId(roll->id());
+  if (gemId.station()==0) return;
   const int nstrips(roll->nstrips());
   double trArea(0.0);
   double trStripArea(0.0);

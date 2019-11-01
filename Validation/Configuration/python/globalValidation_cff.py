@@ -122,7 +122,7 @@ globalPrevalidationLiteTracking = cms.Sequence(globalPrevalidation)
 globalPrevalidationLiteTracking.replace(tracksValidation, tracksValidationLite)
 
 from Validation.Configuration.gemSimValid_cff import *
-from Validation.Configuration.me0SimValid_cff import *
+# from Validation.Configuration.me0SimValid_cff import *
 
 baseCommonPreValidation = cms.Sequence(cms.SequencePlaceholder("mix"))
 baseCommonValidation = cms.Sequence()
@@ -170,7 +170,7 @@ globalValidationOuterTracker = cms.Sequence(OuterTrackerSourceV)
 
 globalPrevalidationMuons = cms.Sequence(
       gemSimValid
-    + me0SimValid
+    # + me0SimValid
     + validSimHit
     + muondtdigianalyzer
     + cscDigiValidation
@@ -192,7 +192,7 @@ _run3_globalValidation = globalValidation.copy()
 _run3_globalValidation += gemSimValid
 
 _phase2_globalValidation = _run3_globalValidation.copy()
-_phase2_globalValidation += me0SimValid
+# _phase2_globalValidation += me0SimValid
 
 
 from Configuration.Eras.Modifier_run2_GEM_2017_cff import run2_GEM_2017

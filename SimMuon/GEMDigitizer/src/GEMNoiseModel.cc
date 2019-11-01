@@ -27,6 +27,9 @@ void GEMNoiseModel::simulate(const GEMEtaPartition* roll,
   const GEMDetId& gemId(roll->id());
   const int nstrips(roll->nstrips());
   double trStripArea(0.0);
+  
+  if (gemId.station() == 0) return;
+
   if (gemId.region() == 0) {
     throw cms::Exception("Geometry") << "GEMNoiseModel::simulate() - this GEM id is from barrel, which cannot happen.";
   }
