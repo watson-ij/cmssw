@@ -187,6 +187,13 @@ void GEMCSCSegmentBuilder::build(const GEMRecHitCollection* recHits,
       for (GEMRecHitCollection::const_iterator hitIt = recHits->begin(); hitIt != recHits->end(); ++hitIt) {
         GEMDetId gemIdfromHit = hitIt->gemId();
 
+	static bool firsttime = true;
+	if (firsttime && (gemId.station() == 0) {
+	  firsttime = false;
+	  edm::LogWarning("GEMCSCSegmentBuilder") << "Constructing GEMCSCSegments from GEM station 0 is not supported.";
+	  continue;
+	}
+
         // Loop over GEM rolls being pointed by a CSC segment and look for a match
         for (std::vector<GEMDetId>::iterator gemRollIt = rollsForThisCSCvector.begin();
              gemRollIt != rollsForThisCSCvector.end();

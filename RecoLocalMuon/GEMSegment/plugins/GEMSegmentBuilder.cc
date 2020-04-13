@@ -46,6 +46,14 @@ void GEMSegmentBuilder::build(const GEMRecHitCollection* recHits, GEMSegmentColl
     // and will also be used to determine the GEMSuperChamber
     // to which the GEMSegment is assigned (done inside GEMSegAlgoXX)
     GEMDetId id(it2->gemId().superChamberId());
+
+    static bool firsttime = true;
+    if (firsttime && (id.station() == 0) {
+      firsttime = false;
+      edm::LogWarning("GEMSegmentBuilder") << "Constructing GEMSegments from station 0 is not yet supported.";
+      continue;
+    }
+
     // save current GEMRecHit in vector associated to the reference id
     ensembleRH[id.rawId()].push_back(&(*it2));
   }

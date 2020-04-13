@@ -141,6 +141,13 @@ void GEMRecHitProducer::produce(Event& event, const EventSetup& setup) {
     // The layerId
     const GEMDetId& gemId = (*gemdgIt).first;
 
+    static bool firsttime = true;
+    if (firsttime && (gemId.station() == 0) {
+      firsttime = false;
+      edm::LogWarning("GEMRecHitProducer") << "Constructing GEMRecHits from station 0 is not yet supported.";
+      continue;
+    }
+
     // Get the GeomDet from the setup
     const GEMEtaPartition* roll = gemGeom_->etaPartition(gemId);
     if (roll == nullptr) {
