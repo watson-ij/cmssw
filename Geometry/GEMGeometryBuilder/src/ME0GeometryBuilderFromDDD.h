@@ -58,7 +58,7 @@ class ME0GeometryBuilderFromDDD {
   //dd4hep
   ME0Geometry* buildGeometry(cms::DDFilteredView& fview, const cms::MuonNumbering& muonConstants);
 
-//  ME0BoundPlane boundPlane(const cms::DDFilteredView& fv, Bounds* bounds, bool isOddChamber) const;
+  ME0BoundPlane boundPlane(const cms::DDFilteredView& fv, Bounds* bounds, bool isOddChamber) const;
   
   ME0Chamber* buildChamber(cms::DDFilteredView& fv, ME0DetId detId) const;
   

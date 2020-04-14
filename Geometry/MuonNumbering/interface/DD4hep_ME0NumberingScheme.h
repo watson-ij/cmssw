@@ -1,6 +1,9 @@
+#ifndef GEOMETRY_MUON_NUMBERING_ME0_NUMBERING_SCHEME_H
+#define GEOMETRY_MUON_NUMBERING_ME0_NUMBERING_SCHEME_H
+/*
 #ifndef Geometry_MuonNumbering_ME0NumberingScheme_h
 #define Geometry_MuonNumbering_ME0NumberingScheme_h
-
+*/
 /*
 //\class ME0NumberingScheme
 
