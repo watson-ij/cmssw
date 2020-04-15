@@ -5,6 +5,14 @@
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "FWCore/Utilities/interface/Exception.h"
 
+// to debug
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
+#include <math.h>
+
+using namespace std;// to debug
+
 //#define LOCAL_DEBUG
 
 ME0NumberingScheme::ME0NumberingScheme(const MuonDDDConstants& muonConstants) { initMe(muonConstants); }
@@ -22,6 +30,9 @@ void ME0NumberingScheme::initMe(const MuonDDDConstants& muonConstants) {
   theRollLevel = muonConstants.getValue("m0_roll") / theLevelPart;
   theNEtaPart = muonConstants.getValue("m0_nroll");
 
+  cout<<"MYDEBUG, ME0NumberingScheme"  << "\ntheRegionLevel " << theRegionLevel << "\ntheLayerLevel " << theLayerLevel
+                                         << "\ntheSectorLevel " << theSectorLevel << "\ntheRollLevel " << theRollLevel
+                                         << "\ntheNEtaPart  " << theNEtaPart <<endl;
   // Debug using LOCAL_DEBUG
 #ifdef LOCAL_DEBUG
   edm::LogVerbatim("ME0NumberingScheme") << "Initialize ME0NumberingScheme"
@@ -66,6 +77,9 @@ int ME0NumberingScheme::baseNumberToUnitNumber(const MuonBaseNumber& num) {
 
   // collect all info
 
+ cout << "MYDEBUG, ME0NumberingScheme: Region " << region << " Layer " << layer << " Chamber "
+					<< chamber << " Roll " << roll << endl;
+
   // Debug using LOCAL_DEBUG
 #ifdef LOCAL_DEBUG
   edm::LogVerbatim("ME0NumberingScheme") << "ME0NumberingScheme: Region " << region << " Layer " << layer << " Chamber "
@@ -82,5 +96,6 @@ int ME0NumberingScheme::baseNumberToUnitNumber(const MuonBaseNumber& num) {
 #endif
   // ---------------------
 
+  cout<<"MYDEBUG, ME0NumberingScheme" << " DetId " << id << endl;
   return id.rawId();
 }

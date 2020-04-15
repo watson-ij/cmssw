@@ -49,14 +49,14 @@ void ME0NumberingScheme::baseNumberToUnitNumber(const MuonBaseNumber& num) {
  
   for (int level = 1; level <= num.getLevels(); level++) {
  
-    cout<<"MYDEBUG, ME0NumberingScheme: "<< "level " << level << " " << num.getSuperNo(level) << " " << num.getBaseNo(level);
+    //  cout<<"MYDEBUG, ME0NumberingScheme: "<< "level " << level << " " << num.getSuperNo(level) << " " << num.getBaseNo(level);
   }
 
   int maxLevel = theRollLevel;
   if (num.getLevels() != maxLevel) {
-    cout<<"MYDEBUG, ME0NumberingScheme: " << "MuonME0NS::BNToUN "
-                                          << "BaseNumber has " << num.getLevels() << " levels,"
-                                          << "need " << maxLevel <<endl;
+    //    cout<<"MYDEBUG, ME0NumberingScheme: " << "MuonME0NS::BNToUN "
+    //                                    << "BaseNumber has " << num.getLevels() << " levels,"
+    //                                    << "need " << maxLevel <<endl;
   }
 
   int region = 0;
