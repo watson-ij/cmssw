@@ -39,7 +39,7 @@ process.test = cms.EDAnalyzer("DDTestMuonNumbering")
 # Note: Please, download the geometry file from a location
 #       specified by Fireworks/Geometry/data/download.url
 #
-# For example: cmsRun $CMSSW_RELEASE_BASE/src/Fireworks/Geometry/python/dumpRecoGeometry_cfg.py tag=2026 version=D49
+# For example: cmsRun $CMSSW_RELEASE_BASE/src/Fireworks/Geometry/python/dumpRecoGeometry_cfg.py tag=2026 version=D41
 #
 process.valid = cms.EDAnalyzer("ME0GeometryValidate",
                                infileName = cms.untracked.string('cmsRecoGeom-2026.root'),
