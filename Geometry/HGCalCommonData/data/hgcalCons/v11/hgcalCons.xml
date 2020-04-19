@@ -9,13 +9,10 @@
      [hgcal:radMixL8], [hgcal:radMixL9], [hgcal:radMixL10],[hgcal:radMixL11],
      [hgcal:radMixL12],[hgcal:radMixL13]
    </Vector>
-  <!--  <Vector name="ZRanges" type="numeric" nEntries="4">
+   <Vector name="ZRanges" type="numeric" nEntries="4">
      [hgcal:zHGCalEE1], [hgcal:zHGCalHEsil1], [hgcal:zHGCalHEmix1], 
-     [hgcal:zHGCalHEmix5]</Vector> -->
-     <Vector name="ZRanges" type="numeric" nEntries="4">
-       3210.5*mm, 3625.1*mm, 4066.1*mm,3625.1*mm  
-     </Vector>
-  <Vector name="LayerCenter" type="numeric" nEntries="50">
+     [hgcal:zHGCalHEmix5]</Vector><!-- Sergio: there is an INFO warning about this vector: Unresolved Vector<numeric>, please check -->
+   <Vector name="LayerCenter" type="numeric" nEntries="50">
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     1, 2, 1, 2, 1, 2, 1, 2,
