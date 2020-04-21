@@ -453,22 +453,22 @@ ME0Geometry* ME0GeometryBuilderFromDDD::buildGeometry(cms::DDFilteredView& fv, c
   ME0Geometry* geometry = new ME0Geometry();
   static int countLayer = 0;   
   static int countChamber = 0;
-  // static int countSChamber = 0;
   static int countEta = 0;      
   
-  // -----------------------------------------  inizio chambers -----------------------------------------
+  // -----------------------------------------  start chambers -----------------------------------------
 
-    bool doChambers = fv.firstChild();// era firstChild()
+  bool doChambers = fv.firstChild();
   while (doChambers) {
 
     cout<<" MYDEBUG, number 1: ME0GeometryBuilder inside while(doChambers), name volume: "<<fv.name()<<endl;
-    /*
+    cout<<" MYDEBUG, count Chamber "<<countChamber<<endl;
+   
     // to etapartitions and back again to pick up DetId
-    fv.down();// era fv.firstChild();
+    fv.down();
     cout<<" MYDEBUG, number 2: ME0GeometryBuilder, inside while(doChambers), after first fv.down() name volume: "<<fv.name()<<endl; 
-    fv.down();// era fv.firstChild(); 
+    fv.down();
     cout<<" MYDEBUG, number 3: ME0GeometryBuilder, inside while(doChambers), after second fv.down() name volume: "<<fv.name()<<endl;
-    */
+   
     MuonBaseNumber mbn = muonConstants.geoHistoryToBaseNumber(fv.history());
     cms::ME0NumberingScheme me0Num(muonConstants.values());
     me0Num.baseNumberToUnitNumber(mbn);
@@ -480,15 +480,15 @@ ME0Geometry* ME0GeometryBuilderFromDDD::buildGeometry(cms::DDFilteredView& fv, c
     ME0Chamber* me0Chamber = buildChamber(fv, detIdCh);
     geometry->add(me0Chamber);
 
-    fv.down();
-    cout<<" MYDEBUG, number 2: ME0GeometryBuilder, inside while(doChambers)  after fv.down() name volume: "<<fv.name()<<" detId: "<<id<<endl;
+    fv.up();
+    fv.up();
 
-    // -------------------------------------------- inizio layers -------------------------------------------------------------    
+    // -------------------------------------------- start layers -------------------------------------------------------------    
     // loop over layers of the chamber
-    bool doLayers = fv.sibling();//era fv.nextSibling or fv.nextSibling()
-      cout<<" MYDEBUG, number 3: ME0GeometryBuilder, outside while(doLayers) after fv.firstChild(), name volume: "<<fv.name()<<" detId: "<<id<<endl;
+    bool doLayers = fv.nextSibling();//era fv.nextSibling or fv.firstChild()
+      cout<<" MYDEBUG, number 4: ME0GeometryBuilder, outside while(doLayers) after fv.nextSibling, name volume: "<<fv.name()<<" detId: "<<id<<endl;
      while (doLayers) {
-
+       cout<<" MYDEBUG, count Layer "<<countLayer<<endl;
        MuonBaseNumber mbn = muonConstants.geoHistoryToBaseNumber(fv.history());
        cms::ME0NumberingScheme me0Num(muonConstants.values());
        me0Num.baseNumberToUnitNumber(mbn);
@@ -501,16 +501,15 @@ ME0Geometry* ME0GeometryBuilderFromDDD::buildGeometry(cms::DDFilteredView& fv, c
        me0Chamber->add(me0Layer);
        geometry->add(me0Layer);
        
-       fv.firstChild();
-       cout<<" MYDEBUG, number 4: ME0GeometryBuilder, inside while(doLayers) after fv.firstChild() name volume: "<<fv.name()<<" detId: "<<id<<endl;
        fv.down();
        cout<<" MYDEBUG, number 5: ME0GeometryBuilder, inside while(doLayers) after fv.down() name volume: "<<fv.name()<<" detId: "<<id<<endl;
        
-       // ----------------------------------------------------- inizio eta partition ---------------------------------------
-       bool doEtaParts = fv.nextSibling(); 
+       // ----------------------------------------------------- start eta partition ---------------------------------------
+       bool doEtaParts = fv.sibling();// era nextSibling 
        cout<<" MYDEBUG, number 6: ME0GeometryBuilder, inside while(doLayers) after fv.nextSibling name volume: "<<fv.name()<<" detId: "<<id<<endl;
        cout<<" MYDEBUG, number 7: ME0GeometryBuilder, doEtaParts: "<<doEtaParts<<endl;     
        while (doEtaParts) {
+	 cout<<" MYDEBUG, count Eta "<<countEta<<endl;
 	 cout<<" MYDEBUG, number 8: ME0GeometryBuilder, inside while (doEtaParts) name volume: "<<fv.name()<<" detId: "<<id<<endl;
 	 MuonBaseNumber mbn = muonConstants.geoHistoryToBaseNumber(fv.history());
 	 cms::ME0NumberingScheme me0Num(muonConstants.values());
@@ -526,18 +525,18 @@ ME0Geometry* ME0GeometryBuilderFromDDD::buildGeometry(cms::DDFilteredView& fv, c
 	 cout<<" MYDEBUG, number 9: ME0GeometryBuilder, inside while (doEtaParts) after fv.sibling() name volume: "<<fv.name()<<" detId: "<<id<<endl;
 	 cout<<" MYDEBUG, number 10: ME0GeometryBuilder, doEtaParts: "<<doEtaParts<<endl;
 	 countEta = countEta + 1;
-       }// ---------------------------------------------------- fine eta partitions ---------------------------------------
+       }// ---------------------------------------------------- end eta partitions ---------------------------------------
       
-       fv.up(); 
+            
        cout<<" MYDEBUG, number 11: ME0GeometryBuilder, inside while (doLayers) after  fv.up() name volume: "<<fv.name()<<" detId: "<<id<<endl;
        cout<<" MYDEBUG, number 12: ME0GeometryBuilder, doLayers: "<<doLayers<<endl;      
-       doLayers = fv.sibling();
+       doLayers = fv.nextSibling();//era fv.sibling()
        cout<<" MYDEBUG, number 13: ME0GeometryBuilder, doLayers: "<<doLayers<<endl;
        cout<<" MYDEBUG, number 14: ME0GeometryBuilder, inside while (doLayers) after fv.sibling() name volume: "<<fv.name()<<" detId: "<<id<<endl;
        countLayer = countLayer + 1;    
-     } // ----------------------------------------------- fine layers ---------------------------------------------------
-     fv.up();
-     doChambers = fv.sibling();
+     } // ----------------------------------------------- end layers ---------------------------------------------------
+     fv.parent();
+     doChambers = fv.firstChild();//era fv.sibling()
      cout<<" MYDEBUG, number 15: ME0GeometryBuilder, inside while (doChamber) after fv.nextSibling() name volume: "<<fv.name()<<" detId: "<<id<<endl;
      cout<<" MYDEBUG, number 16: ME0GeometryBuilder, doChambers: "<<doChambers<<endl;
      countChamber = countChamber + 1;
@@ -618,7 +617,8 @@ ME0EtaPartition* ME0GeometryBuilderFromDDD::buildEtaPartition(cms::DDFilteredVie
 
   auto nStrips = fv.get<double>("nStrips");
   auto nPads = fv.get<double>("nPads");
-
+  cout<<" MYDEBUG, ME0GeometryBuilderFromDDD inside buildEtaPartition, nStrips: "<<nStrips<<endl;
+  cout<<" MYDEBUG, ME0GeometryBuilderFromDDD inside buildEtaPartition, nPads: "<<nStrips<<endl;
   /*
   // EtaPartition specific parameter (nstrips and npads)
   DDValue numbOfStrips("nStrips");

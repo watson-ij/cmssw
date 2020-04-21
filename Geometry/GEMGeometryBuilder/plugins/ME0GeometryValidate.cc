@@ -166,7 +166,7 @@ void ME0GeometryValidate::validateME0ChamberGeometry() {
 
 void ME0GeometryValidate::validateME0EtaPartitionGeometry() {
   clearData2();
-  //  cout<<" MYVALIDATE, inside validate EtaPartion (strips)"<<endl;
+   cout<<" MYVALIDATE, inside validate EtaPartion (strips)"<<endl;
 
   for (auto const& it : me0Geometry_->etaPartitions()) {
     // cout<<" MYVALIDATE, inside Eta partition loop"<<endl;
@@ -178,12 +178,12 @@ void ME0GeometryValidate::validateME0EtaPartitionGeometry() {
     const float stripLen = topo.stripLength();
     const float* parameters = fwGeometry_.getParameters(chId.rawId());
     nstrips_.push_back(fabs(n_strips - parameters[0]));
-    // cout<<" MYVALIDATE, nstrips: "<<n_strips<<" nstrips RECO: "<<parameters[0]<<endl;
+    cout<<" MYVALIDATE, nstrips: "<<n_strips<<" nstrips RECO: "<<parameters[0]<<endl;
     // cout<<" MYVALIDATE, npads: "<<n_pads<<endl;
     if (n_strips) {
       for (int istrips = 1; istrips <= n_strips; istrips++) {
 
-	// cout<<" MYVALIDATE, npitch: "<<n_pitch<<" npitch RECO: "<<parameters[2]<<endl;
+       cout<<" MYVALIDATE, npitch: "<<n_pitch<<" npitch RECO: "<<parameters[2]<<endl;
 
 	if (fabs(n_pitch - parameters[2]) < 1.0e-05)
 	pitch_.push_back(0.0f);  
@@ -196,16 +196,17 @@ void ME0GeometryValidate::validateME0EtaPartitionGeometry() {
 	pitch_.push_back(0.0f);  
 	else
 	stripslen_.push_back(fabs(stripLen - parameters[1]));
-	//cout<<" MYVALIDATE, striplen: "<<stripLen<<" stripLen RECO: "<<parameters[1]<<endl;
+	cout<<" MYVALIDATE, striplen: "<<stripLen<<" stripLen RECO: "<<parameters[1]<<endl;
         //stripslen_.push_back(fabs(stripLen - parameters[1]));
       }
     } else {
       LogVerbatim("ME0Geometry") << "ATTENTION! nStrips == 0";
+      cout<<" ATTENTION! nStrips == 0 "<<endl;
     }
   }
   makeHistograms2("ME0 Eta Partition");
 
-  // cout<<" MYVALIDATE, done histos ME0 EtaPartitions"<<endl;
+  cout<<" MYVALIDATE, done histos ME0 EtaPartitions"<<endl;
 }
 
 void ME0GeometryValidate::compareTransform(const GlobalPoint& gp, const TGeoMatrix* matrix) {
