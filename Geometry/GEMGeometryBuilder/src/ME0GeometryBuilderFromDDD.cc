@@ -454,6 +454,7 @@ ME0Geometry* ME0GeometryBuilderFromDDD::buildGeometry(cms::DDFilteredView& fv, c
   static int countLayer = 0;   
   static int countChamber = 0;
   static int countEta = 0;      
+  static int countEtaBis = 0;      
   
   // -----------------------------------------  start chambers -----------------------------------------
 
@@ -462,13 +463,13 @@ ME0Geometry* ME0GeometryBuilderFromDDD::buildGeometry(cms::DDFilteredView& fv, c
 
     cout<<" MYDEBUG, number 1: ME0GeometryBuilder inside while(doChambers), name volume: "<<fv.name()<<endl;
     cout<<" MYDEBUG, count Chamber "<<countChamber<<endl;
-   
+    /*
     // to etapartitions and back again to pick up DetId
     fv.down();
     cout<<" MYDEBUG, number 2: ME0GeometryBuilder, inside while(doChambers), after first fv.down() name volume: "<<fv.name()<<endl; 
     fv.down();
     cout<<" MYDEBUG, number 3: ME0GeometryBuilder, inside while(doChambers), after second fv.down() name volume: "<<fv.name()<<endl;
-   
+    */
     MuonBaseNumber mbn = muonConstants.geoHistoryToBaseNumber(fv.history());
     cms::ME0NumberingScheme me0Num(muonConstants.values());
     me0Num.baseNumberToUnitNumber(mbn);
@@ -479,9 +480,9 @@ ME0Geometry* ME0GeometryBuilderFromDDD::buildGeometry(cms::DDFilteredView& fv, c
     // build chamber
     ME0Chamber* me0Chamber = buildChamber(fv, detIdCh);
     geometry->add(me0Chamber);
-
-    fv.up();
-    fv.up();
+   
+    //    fv.up();
+    // fv.up();
 
     // -------------------------------------------- start layers -------------------------------------------------------------    
     // loop over layers of the chamber
@@ -503,10 +504,21 @@ ME0Geometry* ME0GeometryBuilderFromDDD::buildGeometry(cms::DDFilteredView& fv, c
        
        fv.down();
        cout<<" MYDEBUG, number 5: ME0GeometryBuilder, inside while(doLayers) after fv.down() name volume: "<<fv.name()<<" detId: "<<id<<endl;
-       
+       //----- build first eta partition       
+       MuonBaseNumber mbnbis = muonConstants.geoHistoryToBaseNumber(fv.history());
+       cms::ME0NumberingScheme me0Numbis(muonConstants.values());
+       me0Numbis.baseNumberToUnitNumber(mbnbis);
+       int idbis = me0Numbis.getDetId();
+       ME0DetId detIdbis = ME0DetId(me0Numbis.getDetId());//era detIdCh
+       // build first etapartition
+       ME0EtaPartition* etaPart = buildEtaPartition(fv, detIdbis);
+       me0Layer->add(etaPart);
+       geometry->add(etaPart);
+       countEtaBis = countEtaBis + 1;
+       //-----end build first eta partition ----------
        // ----------------------------------------------------- start eta partition ---------------------------------------
-       bool doEtaParts = fv.sibling();// era nextSibling 
-       cout<<" MYDEBUG, number 6: ME0GeometryBuilder, inside while(doLayers) after fv.nextSibling name volume: "<<fv.name()<<" detId: "<<id<<endl;
+       bool doEtaParts = fv.sibling();// era sibling 
+       cout<<" MYDEBUG, number 6: ME0GeometryBuilder, inside while(doLayers) after fv.sibling name volume: "<<fv.name()<<" detId: "<<id<<endl;
        cout<<" MYDEBUG, number 7: ME0GeometryBuilder, doEtaParts: "<<doEtaParts<<endl;     
        while (doEtaParts) {
 	 cout<<" MYDEBUG, count Eta "<<countEta<<endl;
@@ -516,7 +528,7 @@ ME0Geometry* ME0GeometryBuilderFromDDD::buildGeometry(cms::DDFilteredView& fv, c
 	 me0Num.baseNumberToUnitNumber(mbn);
 	 int id = me0Num.getDetId();
 	 ME0DetId detId = ME0DetId(me0Num.getDetId());//era detIdCh
-	 // build etapartition
+	 // build other etapartition
 	 ME0EtaPartition* etaPart = buildEtaPartition(fv, detId);
 	 me0Layer->add(etaPart);
 	 geometry->add(etaPart);
@@ -543,7 +555,7 @@ ME0Geometry* ME0GeometryBuilderFromDDD::buildGeometry(cms::DDFilteredView& fv, c
   }
  
   cout<<"-------------------------------------------------------------------------------------------------------"<<endl; 
-  cout<<"COUNTS,  Chamber: "<<countChamber<<" Layers: "<<countLayer<<" Eta: "<<countEta<<endl;
+  cout<<"COUNTS,  Chamber: "<<countChamber<<" Layers: "<<countLayer<<" Eta: "<<countEta<<" EtaBis: "<<countEtaBis<<endl;
   cout<<"-------------------------------------------------------------------------------------------------------"<<endl; 
 
   return geometry;
@@ -665,6 +677,7 @@ cout<<"MYDEBUG, buildEta, dpar 5,6,7,8,0: "<<dpar[5]<<" "<<dpar[6]<<" "<<dpar[7]
   ME0EtaPartition* etaPartition = new ME0EtaPartition(detId, surf, e_p_specs);
   // */
   // ME0EtaPartition* etaPartition;// to be deleted
+  cout<<"MYDEBUG, buildEta, ADDED EtaId = "<<detId<<" name: "<<std::string(name)<<endl;
   return etaPartition;
 }
  

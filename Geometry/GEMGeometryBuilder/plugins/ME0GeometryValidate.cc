@@ -128,6 +128,7 @@ void ME0GeometryValidate::analyze(const edm::Event& event, const edm::EventSetup
     cout<<" MYVALIDATE, end validate eta partitions"<<endl;
   } else
     LogVerbatim("ME0Geometry") << "Invalid ME0 geometry";
+    cout<<" MYVALIDATE, Invalid ME0 geometry"<<endl;
 }
 
 void ME0GeometryValidate::validateME0ChamberGeometry() {
