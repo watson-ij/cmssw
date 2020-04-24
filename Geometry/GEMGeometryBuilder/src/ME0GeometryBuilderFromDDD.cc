@@ -627,10 +627,14 @@ ME0EtaPartition* ME0GeometryBuilderFromDDD::buildEtaPartition(cms::DDFilteredVie
   // /*
 
 
-  auto nStrips = fv.get<double>("nStrips");
-  auto nPads = fv.get<double>("nPads");
+  //  auto nStrips = fv.get<double>("nStrips");
+  // auto nPads = fv.get<double>("nPads");
+
+  auto nStrips = 384; // ok, but why doesn't the code read Geometry/GEMGeometryBuilder/data/v7/GEMSpecs.xml? 
+  auto nPads = 192;  // ok, but why doesn't the code read Geometry/GEMGeometryBuilder/data/v7/GEMSpecs.xml? 
+
   cout<<" MYDEBUG, ME0GeometryBuilderFromDDD inside buildEtaPartition, nStrips: "<<nStrips<<endl;
-  cout<<" MYDEBUG, ME0GeometryBuilderFromDDD inside buildEtaPartition, nPads: "<<nStrips<<endl;
+  cout<<" MYDEBUG, ME0GeometryBuilderFromDDD inside buildEtaPartition, nPads: "<<nPads<<endl;
   /*
   // EtaPartition specific parameter (nstrips and npads)
   DDValue numbOfStrips("nStrips");

@@ -446,8 +446,11 @@ GEMChamber* GEMGeometryBuilderFromDDD::buildChamber(cms::DDFilteredView& fv, GEM
 GEMEtaPartition* GEMGeometryBuilderFromDDD::buildEtaPartition(cms::DDFilteredView& fv, GEMDetId detId) const {
   // EtaPartition specific parameter (nstrips and npads)
 
-  auto nStrips = fv.get<double>("nStrips");
-  auto nPads = fv.get<double>("nPads");
+
+    auto nStrips = fv.get<double>("nStrips");
+   auto nPads = fv.get<double>("nPads");
+
+
 
   // EtaPartition specific parameter (size)
 

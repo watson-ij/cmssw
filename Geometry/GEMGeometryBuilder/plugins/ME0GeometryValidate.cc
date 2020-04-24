@@ -123,7 +123,14 @@ void ME0GeometryValidate::analyze(const edm::Event& event, const edm::EventSetup
     cout<<" MYVALIDATE, start validate chambers"<<endl;
     validateME0ChamberGeometry();
     cout<<" MYVALIDATE, end validate chambers"<<endl;
-    cout<<" MYVALIDATE, start validate eta partitions"<<endl;
+    /*
+    //-------------------------------
+    cout<<" MYVALIDATE, start validate layers"<<endl;
+    validateME0LayerGeometry();
+    cout<<" MYVALIDATE, end validate layesr"<<endl;
+    //-------------------------------
+    */ 
+   cout<<" MYVALIDATE, start validate eta partitions"<<endl;
     validateME0EtaPartitionGeometry();
     cout<<" MYVALIDATE, end validate eta partitions"<<endl;
   } else
@@ -164,7 +171,45 @@ void ME0GeometryValidate::validateME0ChamberGeometry() {
   cout<<" MYVALIDATE, done histos ME0 Chambers"<<endl;
 
 }
+/*
+//------------------------------------------------------
 
+void ME0GeometryValidate::validateME0ChamberGeometry() {
+  
+  clearData();
+    cout<<" MYVALIDATE, inside validate chambers"<<endl;
+
+  for (auto const& it : me0Geometry_->layers()) {
+    cout<<" MYVALIDATE, inside layer loop"<<endl;
+    ME0DetId chId = it->id();
+    GlobalPoint gp = it->surface().toGlobal(LocalPoint(0.0, 0.0, 0.0));
+
+    const TGeoMatrix* matrix = fwGeometry_.getMatrix(chId.rawId());
+
+    if (!matrix) {
+    cout<<" MYVALIDATE, Failed to get matrix of ME0 layer with detid:"  << chId.rawId()<<endl;
+      LogVerbatim("ME0Geometry") << "Failed to get matrix of ME0 layer with detid: " << chId.rawId();
+      continue;
+    }
+    compareTransform(gp, matrix);
+
+    auto const& shape = fwGeometry_.getShapePars(chId.rawId());
+
+    if (!shape) {
+      LogVerbatim("ME0Geometry") << "Failed to get shape of ME0 layer with detid: " << chId.rawId();
+      cout<<" MYVALIDATE, Failed to get shape of ME0 layer with detid:"  << chId.rawId()<<endl;
+      continue;
+    }
+    compareShape(it, shape);
+  }
+  makeHistograms("ME0 Layer");
+
+  cout<<" MYVALIDATE, done histos ME0 Layer"<<endl;
+
+}
+*/
+
+//------------------------------------------------------
 void ME0GeometryValidate::validateME0EtaPartitionGeometry() {
   clearData2();
    cout<<" MYVALIDATE, inside validate EtaPartion (strips)"<<endl;
