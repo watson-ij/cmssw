@@ -16,6 +16,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "Geometry/GEMGeometry/interface/ME0Geometry.h"
+#include "Geometry/GEMGeometry/interface/ME0Layer.h"
 #include "Geometry/GEMGeometry/interface/ME0Chamber.h"
 #include "Geometry/CommonTopologies/interface/StripTopology.h"
 #include "Geometry/Records/interface/MuonGeometryRecord.h"
@@ -63,7 +64,9 @@ private:
   void endJob() override;
   
   void validateME0ChamberGeometry();
+  void validateME0LayerGeometry();
   void validateME0EtaPartitionGeometry();
+  void validateME0EtaPartitionGeometry2();
   
   void compareTransform(const GlobalPoint&, const TGeoMatrix*);
   void compareShape(const GeomDet*, const float*);
@@ -123,19 +126,19 @@ void ME0GeometryValidate::analyze(const edm::Event& event, const edm::EventSetup
     cout<<" MYVALIDATE, start validate chambers"<<endl;
     validateME0ChamberGeometry();
     cout<<" MYVALIDATE, end validate chambers"<<endl;
-    /*
-    //-------------------------------
     cout<<" MYVALIDATE, start validate layers"<<endl;
     validateME0LayerGeometry();
     cout<<" MYVALIDATE, end validate layesr"<<endl;
-    //-------------------------------
-    */ 
-   cout<<" MYVALIDATE, start validate eta partitions"<<endl;
+    cout<<" MYVALIDATE, start validate eta partitions 2"<<endl;
+    validateME0EtaPartitionGeometry2();
+    cout<<" MYVALIDATE, end validate eta partitions2"<<endl;
+    cout<<" MYVALIDATE, start validate eta partitions"<<endl;
     validateME0EtaPartitionGeometry();
     cout<<" MYVALIDATE, end validate eta partitions"<<endl;
-  } else
+  } else{
     LogVerbatim("ME0Geometry") << "Invalid ME0 geometry";
     cout<<" MYVALIDATE, Invalid ME0 geometry"<<endl;
+  }
 }
 
 void ME0GeometryValidate::validateME0ChamberGeometry() {
@@ -171,13 +174,13 @@ void ME0GeometryValidate::validateME0ChamberGeometry() {
   cout<<" MYVALIDATE, done histos ME0 Chambers"<<endl;
 
 }
-/*
+
 //------------------------------------------------------
 
-void ME0GeometryValidate::validateME0ChamberGeometry() {
+void ME0GeometryValidate::validateME0LayerGeometry() {
   
   clearData();
-    cout<<" MYVALIDATE, inside validate chambers"<<endl;
+    cout<<" MYVALIDATE, inside validate layers"<<endl;
 
   for (auto const& it : me0Geometry_->layers()) {
     cout<<" MYVALIDATE, inside layer loop"<<endl;
@@ -207,7 +210,44 @@ void ME0GeometryValidate::validateME0ChamberGeometry() {
   cout<<" MYVALIDATE, done histos ME0 Layer"<<endl;
 
 }
-*/
+
+//------------------------------------------------------
+
+//------------------------------------------------------
+
+void ME0GeometryValidate::validateME0EtaPartitionGeometry2() {
+  
+  clearData();
+    cout<<" MYVALIDATE, inside validate eta partition 2"<<endl;
+
+  for (auto const& it : me0Geometry_->etaPartitions()) {
+    cout<<" MYVALIDATE, inside eta partition loop 2"<<endl;
+    ME0DetId chId = it->id();
+    GlobalPoint gp = it->surface().toGlobal(LocalPoint(0.0, 0.0, 0.0));
+
+    const TGeoMatrix* matrix = fwGeometry_.getMatrix(chId.rawId());
+
+    if (!matrix) {
+    cout<<" MYVALIDATE, Failed to get matrix of ME0 eta partition 2 with detid:"  << chId.rawId()<<endl;
+      LogVerbatim("ME0Geometry") << "Failed to get matrix of ME0 eta partition 2 with detid: " << chId.rawId();
+      continue;
+    }
+    compareTransform(gp, matrix);
+
+    auto const& shape = fwGeometry_.getShapePars(chId.rawId());
+
+    if (!shape) {
+      LogVerbatim("ME0Geometry") << "Failed to get shape of ME0 eta partition 2 with detid: " << chId.rawId();
+      cout<<" MYVALIDATE, Failed to get shape of ME0 eta partition 2 with detid:"  << chId.rawId()<<endl;
+      continue;
+    }
+    compareShape(it, shape);
+  }
+  makeHistograms("ME0 Eta Partition");
+
+  cout<<" MYVALIDATE, done histos ME0 Eta Partition 2"<<endl;
+
+}
 
 //------------------------------------------------------
 void ME0GeometryValidate::validateME0EtaPartitionGeometry() {
@@ -219,7 +259,7 @@ void ME0GeometryValidate::validateME0EtaPartitionGeometry() {
     ME0DetId chId = it->id();
     const int n_strips = it->nstrips();
     const float n_pitch = it->pitch();
-    const int n_pads = it->npads();
+    //const int n_pads = it->npads();
     const StripTopology& topo = it->specificTopology();
     const float stripLen = topo.stripLength();
     const float* parameters = fwGeometry_.getParameters(chId.rawId());
@@ -229,21 +269,18 @@ void ME0GeometryValidate::validateME0EtaPartitionGeometry() {
     if (n_strips) {
       for (int istrips = 1; istrips <= n_strips; istrips++) {
 
-       cout<<" MYVALIDATE, npitch: "<<n_pitch<<" npitch RECO: "<<parameters[2]<<endl;
+	//       cout<<" MYVALIDATE, npitch: "<<n_pitch<<" npitch RECO: "<<parameters[2]<<endl;
 
 	if (fabs(n_pitch - parameters[2]) < 1.0e-05)
 	pitch_.push_back(0.0f);  
 	else
 	pitch_.push_back(fabs(n_pitch - parameters[2]));	 
 
-      //pitch_.push_back(fabs(n_pitch - parameters[2]));	 
-
       if (fabs(stripLen - parameters[1]) < 1.0e-05)
 	pitch_.push_back(0.0f);  
 	else
 	stripslen_.push_back(fabs(stripLen - parameters[1]));
-	cout<<" MYVALIDATE, striplen: "<<stripLen<<" stripLen RECO: "<<parameters[1]<<endl;
-        //stripslen_.push_back(fabs(stripLen - parameters[1]));
+      //	cout<<" MYVALIDATE, striplen: "<<stripLen<<" stripLen RECO: "<<parameters[1]<<endl;
       }
     } else {
       LogVerbatim("ME0Geometry") << "ATTENTION! nStrips == 0";
