@@ -342,6 +342,14 @@ void FWRecoGeometryESProducer::addME0Geometry(FWRecoGeometry& fwRecoGeometry) {
   DetId detId(DetId::Muon, 5);
   try {
     const ME0Geometry* me0Geom = static_cast<const ME0Geometry*>(m_trackingGeom->slaveGeometry(detId));
+    // add in chambers
+    for (auto ch : me0Geom->chambers()) {
+      if (ch) {
+        unsigned int rawid = ch->geographicalId().rawId();
+        unsigned int current = insert_id(rawid, fwRecoGeometry);
+        fillShapeAndPlacement(current, ch, fwRecoGeometry);
+      }
+    }
     for (auto roll : me0Geom->etaPartitions()) {
       if (roll) {
         unsigned int rawid = roll->geographicalId().rawId();
