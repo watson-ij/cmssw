@@ -24,6 +24,9 @@ process.DDCompactViewESProducer = cms.ESProducer("DDCompactViewESProducer",
 )
 process.muonGeometryConstants.fromDD4Hep = True
 
+process.GEMGeometryESModule.useDDD = cms.bool(False)
+process.GEMGeometryESModule.useDD4hep = cms.untracked.bool(True)
+
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(1)
 )
