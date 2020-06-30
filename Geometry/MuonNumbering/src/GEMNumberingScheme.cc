@@ -32,9 +32,9 @@ int GEMNumberingScheme::baseNumberToUnitNumber(const MuonBaseNumber& num) {
 #endif
 
   int maxLevel = theRollLevel;
-  if (num.getLevels() != maxLevel) {
+  if ((num.getLevels() != maxLevel) && (num.getLevels() != (maxLevel-1))) {
     edm::LogWarning("GEMNumberingScheme")
-        << "MuonGEMNumberingScheme::BNToUN: BaseNumber has " << num.getLevels() << " levels, need " << maxLevel;
+      << "MuonGEMNumberingScheme::BNToUN: BaseNumber has " << num.getLevels() << " levels, need " << maxLevel << " for eta partitions or " << num.getLevels()-1 << " for chambers";
     return 0;
   }
 
@@ -55,6 +55,9 @@ int GEMNumberingScheme::baseNumberToUnitNumber(const MuonBaseNumber& num) {
   // GEM are only on the first ring
   ring = 1;
 
+  // chambers are indicated by eta partition==0
+  if (num.getLevels() == maxLevel)
+    roll = num.getBaseNo(theRollLevel) + 1;
   // GE0 has the layer encoded in the ring level
   if (num.getBaseNo(theRingLevel) == 0) {  // 0 => GE1/1, GE2/1
     station = num.getSuperNo(theStationLevel);
@@ -63,7 +66,6 @@ int GEMNumberingScheme::baseNumberToUnitNumber(const MuonBaseNumber& num) {
         << "GEMNumbering: Ring " << ring << " Station " << num.getSuperNo(theStationLevel) << ":" << station;
 #endif
 
-    roll = num.getBaseNo(theRollLevel) + 1;
     const int copyno = num.getBaseNo(theSectorLevel) + 1;
     // Half the chambers are flipped back to front, this is encoded in
     // the chamber number, which affects the layer numbering. Layer 1
@@ -91,7 +93,6 @@ int GEMNumberingScheme::baseNumberToUnitNumber(const MuonBaseNumber& num) {
     station = GEMDetId::minStationId0;
     layer = num.getBaseNo(theRingLevel);
     chamber = num.getBaseNo(theSectorLevel) + 1;
-    roll = num.getBaseNo(theRollLevel) + 1;
   }
 
   // collect all info
