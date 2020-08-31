@@ -40,6 +40,7 @@ from Geometry.EcalMapping.EcalMappingRecord_cfi import *
 
 # muon
 from Geometry.MuonNumbering.muonNumberingInitialization_cfi import *
+from Geometry.MuonNumbering.muonGeometryConstants_cfi import *
 from RecoMuon.DetLayers.muonDetLayerGeometry_cfi import *
 from Geometry.GEMGeometryBuilder.gemGeometry_cfi import *
 from Geometry.CSCGeometryBuilder.idealForDigiCscGeometry_cff import *
