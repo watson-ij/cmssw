@@ -275,6 +275,11 @@ void GEMStripDigiValidation::analyze(const edm::Event& event, const edm::EventSe
 
     const GEMEtaPartition* roll = gem->etaPartition(simhit_gemid);
 
+    if (not roll) {
+      edm::LogError(kLogCategory_) << "Eta partition not found in GEMGeometry, id : " << simhit_gemid << std::endl;      
+      continue;
+    }
+
     const auto& simhit_local_pos = simhit.localPosition();
     const auto& simhit_global_pos = roll->surface().toGlobal(simhit_local_pos);
 
