@@ -11,5 +11,8 @@ gemRecHitHarvesting = DQMEDHarvester("MuonGEMRecHitsHarvestor",
 
 MuonGEMRecHitsPostProcessors = cms.Sequence( gemRecHitHarvesting )
 
+from Configuration.Eras.Modifier_run3_common_cff import run3_common
+run3_common.toModify( gemRecHitHarvesting, stationIds = (1, 2) )
+
 from Configuration.Eras.Modifier_phase2_common_cff import phase2_common
 phase2_common.toModify( gemRecHitHarvesting, stationIds = (0, 1, 2) )
