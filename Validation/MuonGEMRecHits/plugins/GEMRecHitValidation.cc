@@ -34,16 +34,23 @@ void GEMRecHitValidation::bookHistograms(DQMStore::IBooker& booker, edm::Run con
   if (detail_plot_) {
     me_detail_cls_total_ = booker.book1D("cls", cls_title + ";" + cls_x_title + ";" + "Entries", 10, 0.5, 10.5);
 
-    for (const auto& station : gem->regions()[0]->stations()) {
-      Int_t station_id = station->station();
-      for (const auto& roll : station->superChambers()[0]->chambers()[0]->etaPartitions()) {
-        Int_t ieta = roll->id().ieta();
-        ME2IdsKey key{station_id, ieta};
-        me_detail_cls_roll_[key] = booker.book1D(Form("cls_GE%d1-E%d", station_id, ieta),
-                                                 Form("Cluster Size Distribution : GE%d1-E%d", station_id, ieta),
-                                                 10,
-                                                 0.5,
-                                                 10.5);
+    std::map<Int_t, Bool_t> map_station_checked;
+    for (const auto& region : gem->regions()) {
+      for (const auto& station : region->stations()) {
+        Int_t station_id = station->station();
+        if (map_station_checked.find(station_id) != map_station_checked.end())
+          continue;
+        map_station_checked[station_id] = true;
+
+        for (const auto& roll : station->superChambers()[0]->chambers()[0]->etaPartitions()) {
+          Int_t ieta = roll->id().ieta();
+          ME2IdsKey key{station_id, ieta};
+          me_detail_cls_roll_[key] = booker.book1D(Form("cls_GE%d1-E%d", station_id, ieta),
+                                                   Form("Cluster Size Distribution : GE%d1-E%d", station_id, ieta),
+                                                   10,
+                                                   0.5,
+                                                   10.5);
+        }
       }
     }
 
@@ -74,24 +81,30 @@ void GEMRecHitValidation::bookHistograms(DQMStore::IBooker& booker, edm::Run con
   }            // detail plot
 
   // NOTE Residual
-  for (const auto& station : gem->regions()[0]->stations()) {
-    Int_t station_id = station->station();
-    for (const auto& roll : station->superChambers()[0]->chambers()[0]->etaPartitions()) {
-      Int_t ieta = roll->id().ieta();
-      ME2IdsKey key{station_id, ieta};
+  std::map<Int_t, Bool_t> map_station_checked_residual;
+  for (const auto& region : gem->regions()) {
+    for (const auto& station : region->stations()) {
+      Int_t station_id = station->station();
+      if (map_station_checked_residual.find(station_id) != map_station_checked_residual.end())
+        continue;
+      map_station_checked_residual[station_id] = true;
+      for (const auto& roll : station->superChambers()[0]->chambers()[0]->etaPartitions()) {
+        Int_t ieta = roll->id().ieta();
+        ME2IdsKey key{station_id, ieta};
 
-      me_residual_y_[key] = booker.book1D(Form("residual_y_GE%d1-E%d", station_id, ieta),
-                                          Form("Residual in Y : GE%d1-E%d; Residual in Y [cm]", station_id, ieta),
-                                          60,
-                                          -15,
-                                          15);
+        me_residual_y_[key] = booker.book1D(Form("residual_y_GE%d1-E%d", station_id, ieta),
+                                            Form("Residual in Y : GE%d1-E%d; Residual in Y [cm]", station_id, ieta),
+                                            60,
+                                            -15,
+                                            15);
 
-      me_residual_rphi_[key] =
-          booker.book1D(Form("residual_rphi_GE%d1-E%d", station_id, ieta),
-                        Form("Residual in R #times #phi : GE%d1-E%d; Residual in r #times #phi [cm]", station_id, ieta),
-                        60,
-                        -15,
-                        15);
+        me_residual_rphi_[key] = booker.book1D(
+            Form("residual_rphi_GE%d1-E%d", station_id, ieta),
+            Form("Residual in R #times #phi : GE%d1-E%d; Residual in r #times #phi [cm]", station_id, ieta),
+            60,
+            -15,
+            15);
+      }
     }
   }
 
@@ -131,17 +144,23 @@ void GEMRecHitValidation::bookHistograms(DQMStore::IBooker& booker, edm::Run con
 
   // NOTE Pull
   if (detail_plot_) {
-    for (const auto& station : gem->regions()[0]->stations()) {
-      Int_t station_id = station->station();
-      for (const auto& roll : station->superChambers()[0]->chambers()[0]->etaPartitions()) {
-        Int_t ieta = roll->id().ieta();
-        ME2IdsKey key{station_id, ieta};
+    std::map<Int_t, Bool_t> map_station_checked;
+    for (const auto& region : gem->regions()) {
+      for (const auto& station : region->stations()) {
+        Int_t station_id = station->station();
+        if (map_station_checked.find(station_id) != map_station_checked.end())
+          continue;
+        map_station_checked[station_id] = true;
+        for (const auto& roll : station->superChambers()[0]->chambers()[0]->etaPartitions()) {
+          Int_t ieta = roll->id().ieta();
+          ME2IdsKey key{station_id, ieta};
 
-        me_detail_pull_x_[key] = booker.book1D(
-            Form("pull_x_GE%d1-E%d", station_id, ieta), Form("Pull in X : GE%d1-E%d", station_id, ieta), 60, -3, 3);
+          me_detail_pull_x_[key] = booker.book1D(
+              Form("pull_x_GE%d1-E%d", station_id, ieta), Form("Pull in X : GE%d1-E%d", station_id, ieta), 60, -3, 3);
 
-        me_detail_pull_y_[key] = booker.book1D(
-            Form("pull_y_GE%d1-E%d", station_id, ieta), Form("Pull in Y : GE%d1-E%d", station_id, ieta), 60, -3, 3);
+          me_detail_pull_y_[key] = booker.book1D(
+              Form("pull_y_GE%d1-E%d", station_id, ieta), Form("Pull in Y : GE%d1-E%d", station_id, ieta), 60, -3, 3);
+        }
       }
     }
 
