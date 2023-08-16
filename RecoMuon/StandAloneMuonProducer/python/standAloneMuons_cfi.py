@@ -108,7 +108,7 @@ standAloneSETMuons = cms.EDProducer("StandAloneMuonProducer",
     )
                                     )
 
-_enableGEMMeasurement = dict( EnableGEMMeasurement = True )
+_enableGEMMeasurement = dict( EnableGEMMeasurement = False )
 from Configuration.Eras.Modifier_run3_GEM_cff import run3_GEM
 run3_GEM.toModify( standAloneMuons, STATrajBuilderParameters = dict(
     FilterParameters = _enableGEMMeasurement, 
