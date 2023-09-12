@@ -31,6 +31,11 @@ GEMRecHitProducer::GEMRecHitProducer(const ParameterSet& config)
 
   // Turns off GE2/1 demonstrator reconstruction in Run3
   ge21Off_ = config.getParameter<bool>("ge21Off");
+  // Outputs a new collection of all rechits, even if GE2/1 is off it will output here
+  outputAll_ = config.getParameter<bool>("outputAll");
+  if (outputAll_) {
+    produces<GEMRecHitCollection>("allGemRechits");
+  }
   // Get masked- and dead-strip information from file
   applyMasking_ = config.getParameter<bool>("applyMasking");
   if (applyMasking_) {
@@ -84,6 +89,7 @@ void GEMRecHitProducer::fillDescriptions(edm::ConfigurationDescriptions& descrip
   desc.add<edm::InputTag>("gemDigiLabel", edm::InputTag("muonGEMDigis"));
   desc.add<bool>("applyMasking", false);
   desc.add<bool>("ge21Off", false);
+  desc.add<bool>("outputAll", false);
   desc.addOptional<edm::FileInPath>("maskFile");
   desc.addOptional<edm::FileInPath>("deadFile");
   descriptions.add("gemRecHitsDef", desc);
@@ -143,12 +149,16 @@ void GEMRecHitProducer::produce(Event& event, const EventSetup& setup) {
 
   // Create the pointer to the collection which will store the rechits
   auto recHitCollection = std::make_unique<GEMRecHitCollection>();
+  std::unique_ptr<GEMRecHitCollection> allRecHitCollection = nullptr;
+  if (outputAll_) {
+    allRecHitCollection= std::make_unique<GEMRecHitCollection>();
+  }
 
   // Iterate through all digi collections ordered by LayerId
   for (auto gemdgIt = digis->begin(); gemdgIt != digis->end(); ++gemdgIt) {
     // The layerId
     const GEMDetId& gemId = (*gemdgIt).first;
-    if (ge21Off_ && gemId.station() == 2) {
+    if (ge21Off_ and gemId.station() == 2 and not outputAll_) {
       continue;
     }
 
@@ -173,9 +183,18 @@ void GEMRecHitProducer::produce(Event& event, const EventSetup& setup) {
     // Call the reconstruction algorithm
     OwnVector<GEMRecHit> recHits = theAlgo->reconstruct(*roll, gemId, range, mask);
 
-    if (!recHits.empty())  //FIXME: is it really needed?
-      recHitCollection->put(gemId, recHits.begin(), recHits.end());
+    if (!recHits.empty()) {  //FIXME: is it really needed?
+      if (ge21Off_ and gemId.station() != 2) {
+        recHitCollection->put(gemId, recHits.begin(), recHits.end());
+      }
+      if (outputAll_) {
+        allRecHitCollection->put(gemId, recHits.begin(), recHits.end());
+      }
+    }
   }
 
   event.put(std::move(recHitCollection));
+  if (outputAll_) {
+    event.put(std::move(allRecHitCollection), "allGemRechits");
+  }
 }
