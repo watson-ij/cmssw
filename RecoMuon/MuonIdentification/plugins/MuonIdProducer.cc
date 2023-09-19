@@ -169,7 +169,8 @@ MuonIdProducer::MuonIdProducer(const edm::ParameterSet& iConfig)
   edm::InputTag rpcHitTag("rpcRecHits");
   rpcHitToken_ = consumes<RPCRecHitCollection>(rpcHitTag);
 
-  edm::InputTag gemHitTag("gemRecHits");
+  // const auto& gemHitTag = iConfig.getParameter<edm::InputTag>("gemRecHitsInputTag");
+  const auto& gemHitTag = parameters.getParameter<edm::InputTag>("GEMHitCollectionLabel");
   gemHitToken_ = consumes<GEMRecHitCollection>(gemHitTag);
 
   //Consumes... UGH

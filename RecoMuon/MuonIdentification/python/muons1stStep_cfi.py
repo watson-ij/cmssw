@@ -44,6 +44,7 @@ muons1stStep = cms.EDProducer("MuonIdProducer",
 
     # internal
     debugWithTruthMatching = cms.bool(False),
+    gemRecHitsInputTag = cms.InputTag("gemRecHits", ""),
     # input tracks
     inputCollectionLabels = cms.VInputTag(cms.InputTag("generalTracks"), cms.InputTag("globalMuons"), cms.InputTag("standAloneMuons","UpdatedAtVtx"), cms.InputTag("standAloneMuons"),
                                           cms.InputTag("tevMuons","firstHit"),cms.InputTag("tevMuons","picky"),cms.InputTag("tevMuons","dyt")),
@@ -95,11 +96,19 @@ muons1stStep = cms.EDProducer("MuonIdProducer",
 )
 
 from Configuration.Eras.Modifier_run3_GEM_cff import run3_GEM
-run3_GEM.toModify( muons1stStep, TrackAssociatorParameters = dict(useGEM = True ) )
+run3_GEM.toModify( muons1stStep, TrackAssociatorParameters = dict(useGEM = True,
+                                                                  GEMHitCollectionLabel = cms.InputTag("gemRecHits", "allGemRechits")) )
 from Configuration.Eras.Modifier_phase2_muon_cff import phase2_muon
-phase2_muon.toModify( muons1stStep, TrackAssociatorParameters = dict(useME0 = True ) )
+phase2_muon.toModify( muons1stStep, TrackAssociatorParameters = dict(useME0 = True,
+                                                                     GEMHitCollectionLabel = cms.InputTag("gemRecHits", "")) )
 from Configuration.Eras.Modifier_phase2_GE0_cff import phase2_GE0
 phase2_GE0.toModify( muons1stStep, TrackAssociatorParameters = dict(useME0 = False ) )
+
+# # Add GE2/1 demonstrator hits in Run 3
+# run3_GEM.toModify( muons1stStep, gemRecHitsInputTag = cms.InputTag("gemRecHits", "allGemRechits"))
+# from Configuration.Eras.Modifier_phase2_GEM_cff import phase2_GEM
+# phase2_GEM.toModify( muons1stStep, gemRecHitsInputTag = cms.InputTag("gemRecHits", ""))
+
 
 muonEcalDetIds = cms.EDProducer("InterestingEcalDetIdProducer",
                                 inputCollection = cms.InputTag("muons1stStep")
