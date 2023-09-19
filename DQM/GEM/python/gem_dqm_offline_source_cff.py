@@ -11,6 +11,11 @@ GEMDigiSource.runType      = "offline"
 GEMRecHitSource.runType    = "offline"
 GEMDAQStatusSource.runType = "offline"
 
+from Configuration.Eras.Modifier_run3_GEM_cff import run3_GEM
+from Configuration.Eras.Modifier_phase2_GEM_cff import phase2_GEM
+run3_GEM.toModify(GEMRecHitSource, recHitsInputLabel = cms.InputTag("gemRecHits", "allGemRechits"))
+phase2_GEM.toModify(GEMRecHitSource, recHitsInputLabel = cms.InputTag("gemRecHits", ""))
+
 gemSources = cms.Sequence(
     GEMDigiSource *
     GEMRecHitSource *
