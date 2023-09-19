@@ -66,5 +66,6 @@ private:
 
   bool applyMasking_;
   bool ge21Off_;
+  bool outputAll_;
 };
 #endif
